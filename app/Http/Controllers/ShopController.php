@@ -268,11 +268,13 @@ class ShopController extends Controller
 
     public function contactSubmit(Request $request)
     {
-        $request->validate([
+        $data = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email'],
             'message' => ['required', 'string', 'min:5'],
         ]);
+
+        \App\Models\ContactMessage::create($data);
 
         return back()->with('status', 'Thanks! Your message has been sent.');
     }

@@ -1,0 +1,37 @@
+<?php
+
+namespace App\Http\Controllers\Admin;
+
+use App\Http\Controllers\Controller;
+use App\Models\Setting;
+use Illuminate\Http\Request;
+
+class SettingController extends Controller
+{
+    public function edit()
+    {
+        return view('admin.settings.edit', [
+            'contact' => config('shop.contact', []),
+            'social' => config('shop.social', []),
+        ]);
+    }
+
+    public function update(Request $request)
+    {
+        $data = $request->validate([
+            'contact.email' => ['nullable', 'string', 'max:255'],
+            'contact.phone' => ['nullable', 'string', 'max:255'],
+            'contact.address' => ['nullable', 'string', 'max:255'],
+            'contact.hours' => ['nullable', 'string', 'max:255'],
+            'social.instagram' => ['nullable', 'url', 'max:255'],
+            'social.facebook' => ['nullable', 'url', 'max:255'],
+            'social.youtube' => ['nullable', 'url', 'max:255'],
+            'social.x' => ['nullable', 'url', 'max:255'],
+        ]);
+
+        Setting::put('contact', array_filter($data['contact'] ?? [], fn ($v) => $v !== null));
+        Setting::put('social', $data['social'] ?? []);
+
+        return back()->with('status', 'Site settings saved.');
+    }
+}
