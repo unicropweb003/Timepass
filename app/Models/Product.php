@@ -8,7 +8,7 @@ class Product extends Model
 {
     protected $fillable = [
         'name', 'slug', 'category', 'type', 'form', 'price', 'mrp',
-        'description', 'rating', 'reviews', 'image', 'tags',
+        'description', 'details', 'rating', 'reviews', 'image', 'tags',
         'is_active', 'sort_order',
     ];
 
@@ -28,13 +28,16 @@ class Product extends Model
     public function toConfigArray(): array
     {
         return [
+            'id' => $this->id,
             'name' => $this->name,
+            'slug' => $this->slug,
             'category' => $this->category,
             'type' => $this->type,
             'form' => $this->form,
             'price' => (int) $this->price,
             'mrp' => $this->mrp !== null ? (int) $this->mrp : null,
             'description' => $this->description,
+            'details' => $this->details,
             'rating' => (float) $this->rating,
             'reviews' => (int) $this->reviews,
             'image' => $this->image,

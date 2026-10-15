@@ -72,9 +72,17 @@
         </div>
 
         <div>
-            <label class="block text-sm font-medium text-gray-700">Description</label>
-            <textarea name="description" rows="3"
+            <label class="block text-sm font-medium text-gray-700">Short description <span class="text-gray-400">— shown on product cards</span></label>
+            <textarea name="description" rows="2" maxlength="500"
                 class="mt-1 block w-full rounded-lg border border-gray-300 px-3.5 py-2.5 shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40">{{ old('description', $product->description) }}</textarea>
+            <p class="mt-1 text-xs text-gray-400">A one or two line summary (max 500 characters).</p>
+        </div>
+
+        <div>
+            <label class="block text-sm font-medium text-gray-700">Full description <span class="text-gray-400">— shown on the product page</span></label>
+            <textarea name="details" rows="8"
+                class="mt-1 block w-full rounded-lg border border-gray-300 px-3.5 py-2.5 shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40">{{ old('details', $product->details) }}</textarea>
+            <p class="mt-1 text-xs text-gray-400">The detailed description shown under "The good stuff inside". Write multiple paragraphs; start a line with "• " for bullet points.</p>
         </div>
 
         <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">

@@ -69,4 +69,15 @@ class User extends Authenticatable
     {
         return $this->hasMany(Address::class);
     }
+
+    public function wishlists(): HasMany
+    {
+        return $this->hasMany(Wishlist::class);
+    }
+
+    /** IDs of the products this user has wishlisted. */
+    public function wishlistProductIds(): array
+    {
+        return $this->wishlists()->pluck('product_id')->map(fn ($id) => (int) $id)->all();
+    }
 }

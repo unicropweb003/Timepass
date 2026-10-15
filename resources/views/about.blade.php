@@ -45,24 +45,24 @@
 <div class="space-y-12 sm:space-y-16">
 
     {{-- Hero (compact two-column) --}}
-    <section class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-500 px-6 py-10 text-white shadow-xl shadow-indigo-500/20 sm:px-10 sm:py-12">
+    <section class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-500 px-6 py-8 text-white shadow-xl shadow-indigo-500/20 sm:px-10 sm:py-9">
         <div class="pointer-events-none absolute -right-16 -top-20 h-64 w-64 rounded-full bg-white/10 blur-3xl"></div>
         <div class="pointer-events-none absolute -bottom-24 -left-10 h-72 w-72 rounded-full bg-pink-300/20 blur-3xl"></div>
 
-        <div class="relative grid items-center gap-8 lg:grid-cols-[1.05fr_0.95fr] lg:gap-12">
+        <div class="relative grid items-center gap-6 lg:grid-cols-[1.05fr_0.95fr] lg:gap-10">
             {{-- Copy --}}
             <div>
                 <span class="inline-flex items-center gap-2 rounded-full bg-white/15 px-3.5 py-1.5 text-xs font-semibold uppercase tracking-wider ring-1 ring-white/25 backdrop-blur">
                     <span aria-hidden="true">✨</span> About TimePass
                 </span>
-                <h1 class="mt-5 text-3xl font-black leading-[1.1] tracking-tight sm:text-4xl">
+                <h1 class="mt-4 text-2xl font-black leading-[1.15] tracking-tight sm:text-3xl">
                     Beauty essentials for your everyday self-care
                 </h1>
-                <p class="mt-4 max-w-xl text-sm leading-relaxed text-white/90 sm:text-base">
+                <p class="mt-3 max-w-xl text-sm leading-relaxed text-white/90">
                     Your one-stop beauty store for skin care, hair care, makeup, fragrances and more —
                     trusted products at honest prices, so self-care feels simple and joyful.
                 </p>
-                <div class="mt-7 flex flex-wrap gap-3">
+                <div class="mt-6 flex flex-wrap gap-3">
                     <a href="{{ route('products') }}"
                        class="inline-flex items-center gap-2 rounded-full bg-white px-6 py-3 text-sm font-bold text-indigo-700 shadow-lg transition hover:-translate-y-0.5 hover:shadow-xl">
                         Explore products
@@ -76,15 +76,17 @@
             </div>
 
             {{-- Category preview tiles (glass) --}}
-            <div class="hidden sm:grid grid-cols-2 gap-3 sm:gap-4">
+            <div class="hidden grid-cols-2 gap-3 sm:grid">
                 @foreach (array_slice($categories, 0, 4) as $i => $category)
                     <a href="{{ route('products', ['category' => $category['slug']]) }}"
-                       class="group rounded-2xl bg-white/10 p-4 ring-1 ring-white/20 backdrop-blur transition hover:-translate-y-1 hover:bg-white/20 {{ $i % 2 ? 'sm:translate-y-5' : '' }}">
-                        <span class="flex h-11 w-11 items-center justify-center rounded-xl bg-white/20 text-white ring-1 ring-white/25">
-                            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="{{ $category['icon'] }}"/></svg>
+                       class="group flex items-center gap-3 rounded-xl bg-white/10 p-3 ring-1 ring-white/20 backdrop-blur transition hover:-translate-y-0.5 hover:bg-white/20">
+                        <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white/20 text-white ring-1 ring-white/25">
+                            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="{{ $category['icon'] }}"/></svg>
                         </span>
-                        <p class="mt-3 text-sm font-bold text-white">{{ $category['name'] }}</p>
-                        <p class="text-xs text-white/70">{{ $productCounts[$category['slug']] ?? 0 }} products</p>
+                        <span class="min-w-0">
+                            <span class="block truncate text-sm font-bold leading-tight text-white">{{ $category['name'] }}</span>
+                            <span class="block text-xs text-white/70">{{ $productCounts[$category['slug']] ?? 0 }} products</span>
+                        </span>
                     </a>
                 @endforeach
             </div>

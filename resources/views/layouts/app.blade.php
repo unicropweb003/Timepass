@@ -5,8 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ $title ?? 'TimePass Store' }}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;0,800;1,500&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com/3.4.16"></script>
     <style>
+        .font-display { font-family: 'Playfair Display', Georgia, 'Times New Roman', serif; }
         @keyframes nav-gradient { 0%, 100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
         @keyframes nav-shimmer { from { transform: translateX(-120%) skewX(-20deg); } to { transform: translateX(220%) skewX(-20deg); } }
         @keyframes nav-glow { 0%, 100% { opacity: .55; transform: scale(1); } 50% { opacity: .9; transform: scale(1.15); } }
@@ -49,6 +53,7 @@
         // "My Account" links in the user menu (desktop dropdown and mobile menu).
         $accountMenu = [
             ['account.index', 'My Account', 'M17.982 18.725A7.488 7.488 0 0 0 12 15.75a7.488 7.488 0 0 0-5.982 2.975m11.963 0a9 9 0 1 0-11.963 0m11.963 0A8.966 8.966 0 0 1 12 21a8.966 8.966 0 0 1-5.982-2.275M15 9.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z'],
+            ['account.wishlist', 'My Wishlist', 'M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z'],
             ['account.orders', 'My Orders', 'M20.25 7.5l-.625 10.632a2.25 2.25 0 0 1-2.247 2.118H6.622a2.25 2.25 0 0 1-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125Z'],
             ['account.transactions', 'Transactions', 'M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 0 0 2.25-2.25V6.75A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25v10.5A2.25 2.25 0 0 0 4.5 19.5Z'],
             ['account.addresses', 'Delivery Addresses', 'M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z'],
@@ -578,6 +583,50 @@
                     e.preventDefault();
                     search.focus();
                 }
+            });
+        })();
+    </script>
+    @auth
+        <script>window.__TP_WISH = @json(auth()->user()->wishlistProductIds());</script>
+    @endauth
+    <script>
+        // Wishlist hearts (saved to the logged-in user's account). Works on any page with [data-wish].
+        (function () {
+            const authed = {{ auth()->check() ? 'true' : 'false' }};
+            const ids = new Set((window.__TP_WISH || []).map(Number));
+            const toggleUrl = @json(route('account.wishlist.toggle'));
+            const loginUrl = @json(route('login'));
+            const csrf = document.querySelector('meta[name="csrf-token"]')?.content;
+            const paint = (btn, on) => {
+                btn.classList.toggle('text-rose-500', on);
+                const s = btn.querySelector('svg');
+                if (s) s.setAttribute('fill', on ? 'currentColor' : 'none');
+            };
+            document.querySelectorAll('[data-wish]').forEach((btn) => {
+                const id = Number(btn.dataset.wish);
+                if (id) paint(btn, ids.has(id));
+            });
+            document.addEventListener('click', async (e) => {
+                const btn = e.target.closest('[data-wish]');
+                if (!btn) return;
+                e.preventDefault(); e.stopPropagation();
+                const id = Number(btn.dataset.wish);
+                if (!id) return;
+                if (!authed) { window.location.href = loginUrl; return; }
+                btn.disabled = true;
+                try {
+                    const res = await fetch(toggleUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': csrf },
+                        body: JSON.stringify({ product_id: id }),
+                    });
+                    if (!res.ok) throw new Error('failed');
+                    const data = await res.json();
+                    if (data.wished) ids.add(id); else ids.delete(id);
+                    paint(btn, data.wished);
+                    if (btn.animate) btn.animate([{ transform: 'scale(1)' }, { transform: 'scale(1.3)' }, { transform: 'scale(1)' }], { duration: 240 });
+                } catch (err) { /* ignore */ }
+                finally { btn.disabled = false; }
             });
         })();
     </script>

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class ShopController extends Controller
 {
@@ -143,8 +144,9 @@ class ShopController extends Controller
             ],
         ];
 
-        // SAMPLE reviews for the "What our customers say" section. Replace them with real
-        // customer reviews before the site goes live: made-up reviews mislead shoppers.
+        // Customer reviews for the "What our customers say" section. These are now
+        // managed from the admin panel (Reviews). The sample reviews below are only a
+        // fallback shown when no reviews exist in the database yet.
         $reviews = [
             [
                 'name' => 'Anjali Mehta',
@@ -159,6 +161,23 @@ class ShopController extends Controller
                 'text' => 'The keratin shampoo leaves my hair soft and much less frizzy. Delivery was quick and the products were packed nicely.',
             ],
         ];
+
+        try {
+            $dbReviews = \App\Models\Review::where('is_active', true)
+                ->orderBy('sort_order')->orderBy('id')
+                ->get(['name', 'tagline', 'rating', 'text']);
+
+            if ($dbReviews->isNotEmpty()) {
+                $reviews = $dbReviews->map(fn ($r) => [
+                    'name' => $r->name,
+                    'tagline' => $r->tagline,
+                    'rating' => (int) $r->rating,
+                    'text' => $r->text,
+                ])->all();
+            }
+        } catch (\Throwable $e) {
+            // Table not migrated yet — keep the sample fallback above.
+        }
 
         return view('home', compact('offer', 'promos', 'bestSellers', 'recommended', 'reviews', 'wideBanners', 'dualBanners'));
     }
@@ -224,17 +243,38 @@ class ShopController extends Controller
 
         return collect(config('products', []))
             ->filter(fn ($p) => isset($categories[$p['category']]['types'][$p['type']]))
-            ->map(fn ($p) => $p + [
-                'category_slug' => $p['category'],
-                'type_slug' => $p['type'],
-                'form_slug' => $p['form'],
-                'url' => route('products', ['category' => $p['category'], 'type' => $p['type']]),
-            ])
+            ->map(function ($p) {
+                $slug = $p['slug'] ?? Str::slug($p['name']);
+                return $p + [
+                    'slug' => $slug,
+                    'category_slug' => $p['category'],
+                    'type_slug' => $p['type'],
+                    'form_slug' => $p['form'],
+                    'url' => route('product.show', ['product' => $slug]),
+                ];
+            })
             ->map(fn ($p) => array_merge($p, [
                 'category' => $categories[$p['category_slug']]['name'],
                 'type' => $categories[$p['category_slug']]['types'][$p['type_slug']],
             ]))
             ->values();
+    }
+
+    /**
+     * Single product detail page (looked up by slug).
+     */
+    public function show(string $product)
+    {
+        $catalog = $this->catalog();
+        $item = $catalog->firstWhere('slug', $product);
+        abort_if($item === null, 404);
+
+        $related = $catalog
+            ->where('category_slug', $item['category_slug'])
+            ->where('slug', '!=', $item['slug'])
+            ->take(4)->values();
+
+        return view('product', ['product' => $item, 'related' => $related]);
     }
 
     public function about()

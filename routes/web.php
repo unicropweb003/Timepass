@@ -3,6 +3,7 @@
 use App\Http\Controllers\AccountController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ShopController;
+use App\Http\Controllers\WishlistController;
 use App\Http\Controllers\Admin\AuthController as AdminAuthController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\ContactMessageController;
@@ -10,13 +11,16 @@ use App\Http\Controllers\Admin\CustomerController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\ProductController;
+use App\Http\Controllers\Admin\ReviewController;
 use App\Http\Controllers\Admin\SettingController;
 use App\Http\Controllers\Admin\TransactionController;
+use App\Http\Controllers\Admin\WishlistController as AdminWishlistController;
 use Illuminate\Support\Facades\Route;
 
 // Public shop pages.
 Route::get('/', [ShopController::class, 'home'])->name('home');
 Route::get('/products', [ShopController::class, 'products'])->name('products');
+Route::get('/product/{product}', [ShopController::class, 'show'])->name('product.show');
 Route::get('/search', [ShopController::class, 'search'])->name('search');
 Route::get('/about', [ShopController::class, 'about'])->name('about');
 Route::get('/contact', [ShopController::class, 'contact'])->name('contact');
@@ -43,6 +47,8 @@ Route::post('/logout', [AuthController::class, 'logout'])
 // My Account (logged-in customers only).
 Route::middleware('auth')->prefix('account')->name('account.')->controller(AccountController::class)->group(function () {
     Route::get('/', 'index')->name('index');
+    Route::get('/wishlist', [WishlistController::class, 'index'])->name('wishlist');
+    Route::post('/wishlist/toggle', [WishlistController::class, 'toggle'])->name('wishlist.toggle');
     Route::get('/orders', 'orders')->name('orders');
     Route::get('/orders/{orderNumber}', 'showOrder')->name('orders.show');
     Route::get('/transactions', 'transactions')->name('transactions');
@@ -74,6 +80,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         Route::resource('products', ProductController::class)->except('show');
         Route::resource('categories', CategoryController::class)->except('show');
+        Route::resource('reviews', ReviewController::class)->except('show');
+        Route::get('/wishlists', [AdminWishlistController::class, 'index'])->name('wishlists.index');
 
         Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
         Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show');
