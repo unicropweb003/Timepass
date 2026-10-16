@@ -47,4 +47,10 @@ return [
         'token' => env('MCP_TOKEN'),
     ],
 
+    // Optional key for unlimited AI image generation (enter.pollinations.ai).
+    // Without it the free tier allows about one image every 45 seconds.
+    'pollinations' => [
+        'token' => env('POLLINATIONS_TOKEN'),
+    ],
+
 ];
