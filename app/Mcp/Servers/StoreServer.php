@@ -8,6 +8,7 @@ use App\Mcp\Tools\Categories\ListCategories;
 use App\Mcp\Tools\Categories\UpdateCategory;
 use App\Mcp\Tools\Products\CreateProduct;
 use App\Mcp\Tools\Products\DeleteProduct;
+use App\Mcp\Tools\Products\GenerateProductImage;
 use App\Mcp\Tools\Products\ListProducts;
 use App\Mcp\Tools\Products\UpdateProduct;
 use App\Mcp\Tools\Reviews\CreateReview;
@@ -38,6 +39,7 @@ class StoreServer extends Server
         CreateProduct::class,
         UpdateProduct::class,
         DeleteProduct::class,
+        GenerateProductImage::class,
         // Categories
         ListCategories::class,
         CreateCategory::class,

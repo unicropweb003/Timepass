@@ -13,7 +13,7 @@ create / update / delete **products, categories, reviews**, and edit the site
 
 | Module | Tools |
 |--------|-------|
-| Products | `list_products`, `create_product`, `update_product`, `delete_product` |
+| Products | `list_products`, `create_product`, `update_product`, `delete_product`, `generate_product_image` (AI image) |
 | Categories | `list_categories`, `create_category`, `update_category`, `delete_category` |
 | Reviews | `list_reviews`, `create_review`, `update_review`, `delete_review` |
 | Settings | `get_settings`, `update_settings` |
