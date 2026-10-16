@@ -1,0 +1,149 @@
+name: CI/CD
+
+# Runs on every push and PR to main.
+#  - Pushes to main: test + build + security audit, then (only if tests pass) deploy to Render.
+#  - Pull requests:  test + build + security audit only (NO deploy).
+# This gates production: broken code can never reach the live server because the
+# deploy step only runs after the "Test & Build" job succeeds.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+# Cancel an in-progress run if a newer commit is pushed to the same branch.
+concurrency:
+  group: ci-cd-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  # ─────────────────────────────────────────────────────────────
+  # 1. HARD GATE: install, lint, build assets, run the test suite.
+  #    If anything here fails, the deploy job never runs.
+  # ─────────────────────────────────────────────────────────────
+  test:
+    name: Test & Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup PHP 8.3
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          # pdo_sqlite/sqlite3 are required by the test suite (in-memory DB).
+          # pdo_pgsql matches production (Neon Postgres).
+          extensions: mbstring, dom, fileinfo, pdo, pdo_sqlite, sqlite3, pdo_pgsql, zip, bcmath, intl
+          coverage: none
+          tools: composer:v2
+
+      - name: Prepare .env (testing)
+        run: cp .env.example .env
+
+      - name: Get Composer cache directory
+        id: composer-cache
+        run: echo "dir=$(composer config cache-files-dir)" >> "$GITHUB_OUTPUT"
+
+      - name: Cache Composer packages
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: ${{ runner.os }}-composer-
+
+      - name: Install PHP dependencies
+        run: composer install --prefer-dist --no-interaction --no-progress
+
+      - name: Generate application key
+        run: php artisan key:generate
+
+      - name: Check code style (Laravel Pint)
+        run: vendor/bin/pint --test
+
+      - name: Setup Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install frontend dependencies
+        run: npm install
+
+      - name: Build frontend assets (Vite)
+        run: npm run build
+
+      - name: Run test suite
+        env:
+          APP_ENV: testing
+          DB_CONNECTION: sqlite
+          DB_DATABASE: ':memory:'
+        run: php artisan test
+
+  # ─────────────────────────────────────────────────────────────
+  # 2. Security audit (dependency vulnerabilities).
+  #    Advisory by default (continue-on-error) so a noisy transitive
+  #    advisory can't block an urgent deploy. Findings still show in
+  #    the job logs. Remove the continue-on-error lines to make it
+  #    a hard gate.
+  # ─────────────────────────────────────────────────────────────
+  security:
+    name: Security audit
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup PHP 8.3
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          tools: composer:v2
+
+      - name: Install PHP dependencies
+        run: composer install --prefer-dist --no-interaction --no-progress
+
+      - name: Composer security audit
+        run: composer audit --no-dev
+        continue-on-error: true
+
+      - name: Setup Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: NPM security audit
+        run: |
+          npm install --package-lock-only
+          npm audit --audit-level=high
+        continue-on-error: true
+
+  # ─────────────────────────────────────────────────────────────
+  # 3. Deploy to Render — ONLY on push to main, ONLY after the
+  #    test + security jobs succeed. Triggered via a Render Deploy
+  #    Hook stored as a GitHub Actions secret.
+  # ─────────────────────────────────────────────────────────────
+  deploy:
+    name: Deploy to Render
+    needs: [test, security]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Trigger Render deploy
+        env:
+          RENDER_DEPLOY_HOOK_URL: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
+        run: |
+          if [ -z "$RENDER_DEPLOY_HOOK_URL" ]; then
+            echo "::error::Secret RENDER_DEPLOY_HOOK_URL is not set. Add it under repo Settings > Secrets and variables > Actions."
+            exit 1
+          fi
+          echo "Tests passed — triggering Render deploy..."
+          curl -fsS -X POST "$RENDER_DEPLOY_HOOK_URL"
+          echo ""
+          echo "Render deploy triggered successfully."
