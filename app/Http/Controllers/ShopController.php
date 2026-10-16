@@ -244,22 +244,28 @@ class ShopController extends Controller
         $categories = collect(config('shop.categories', []))->keyBy('slug');
 
         return collect(config('products', []))
-            ->filter(fn ($p) => isset($categories[$p['category']]['types'][$p['type']]))
-            ->map(function ($p) {
+            // Show a product as long as its category exists. The type is optional:
+            // products added without a (matching) type still appear on the site.
+            ->filter(fn ($p) => isset($categories[$p['category'] ?? null]))
+            ->map(function ($p) use ($categories) {
                 $slug = $p['slug'] ?? Str::slug($p['name']);
+                $categorySlug = $p['category'];
+                $typeSlug = $p['type'] ?? null;
+                $category = $categories[$categorySlug];
+                $typeName = ($typeSlug !== null && isset($category['types'][$typeSlug]))
+                    ? $category['types'][$typeSlug]
+                    : null;
 
-                return $p + [
+                return array_merge($p, [
                     'slug' => $slug,
-                    'category_slug' => $p['category'],
-                    'type_slug' => $p['type'],
-                    'form_slug' => $p['form'],
+                    'category_slug' => $categorySlug,
+                    'type_slug' => $typeSlug,
+                    'form_slug' => $p['form'] ?? null,
                     'url' => route('product.show', ['product' => $slug]),
-                ];
+                    'category' => $category['name'],
+                    'type' => $typeName,
+                ]);
             })
-            ->map(fn ($p) => array_merge($p, [
-                'category' => $categories[$p['category_slug']]['name'],
-                'type' => $categories[$p['category_slug']]['types'][$p['type_slug']],
-            ]))
             ->values();
     }
 
