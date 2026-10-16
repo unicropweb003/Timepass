@@ -9,6 +9,12 @@ class ReviewSeeder extends Seeder
 {
     public function run(): void
     {
+        // Only seed an empty table: this runs on every deploy and must not
+        // re-create reviews you deleted or re-show ones you hid.
+        if (Review::query()->exists()) {
+            return;
+        }
+
         // Starter testimonials (previously hard-coded on the home page).
         // Replace with real customer reviews from the admin before going live.
         $reviews = [
@@ -27,15 +33,7 @@ class ReviewSeeder extends Seeder
         ];
 
         foreach ($reviews as $i => $r) {
-            Review::updateOrCreate(
-                ['name' => $r['name'], 'text' => $r['text']],
-                [
-                    'tagline' => $r['tagline'],
-                    'rating' => $r['rating'],
-                    'is_active' => true,
-                    'sort_order' => $i,
-                ]
-            );
+            Review::create($r + ['is_active' => true, 'sort_order' => $i]);
         }
     }
 }

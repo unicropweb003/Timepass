@@ -12,15 +12,22 @@ class AdminUserSeeder extends Seeder
     {
         // The primary administrator. Google sign-in works for this email
         // once Google credentials are configured in .env.
-        User::updateOrCreate(
-            ['email' => 'unicropweb003@gmail.com'],
-            [
-                'name' => 'Administrator',
-                'phone' => '9999999999',
-                'password' => Hash::make('Admin@12345'),
-                'is_admin' => true,
-                'is_blocked' => false,
-            ]
-        );
+        //
+        // This runs on every deploy: it creates the account on a fresh
+        // database, and afterwards only keeps it an unblocked admin. It never
+        // resets the password or profile, so a changed password sticks.
+        $user = User::firstOrNew(['email' => 'unicropweb003@gmail.com']);
+
+        if (! $user->exists) {
+            $user->name = 'Administrator';
+            $user->password = Hash::make('Admin@12345');
+            if (! User::where('phone', '9999999999')->exists()) {
+                $user->phone = '9999999999';
+            }
+        }
+
+        $user->is_admin = true;
+        $user->is_blocked = false;
+        $user->save();
     }
 }
