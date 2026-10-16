@@ -15,7 +15,16 @@ use App\Http\Controllers\Admin\WishlistController as AdminWishlistController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ShopController;
 use App\Http\Controllers\WishlistController;
+use App\Models\Media;
 use Illuminate\Support\Facades\Route;
+
+// Images stored in the database (uploaded via the MCP set_product_image tool).
+Route::get('/media/{media}', function (Media $media) {
+    return response(base64_decode($media->data), 200, [
+        'Content-Type' => $media->mime,
+        'Cache-Control' => 'public, max-age=31536000, immutable',
+    ]);
+})->whereNumber('media')->name('media.show');
 
 // Public shop pages.
 Route::get('/', [ShopController::class, 'home'])->name('home');
