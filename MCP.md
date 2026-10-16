@@ -5,8 +5,8 @@ This project ships an **MCP (Model Context Protocol) server** so AI clients like
 create / update / delete **products, categories, reviews**, and edit the site
 **settings** (contact details + social links).
 
-- **Endpoint:** `https://timepass-al0s.onrender.com/mcp`
-- **Auth:** send header `Authorization: Bearer <MCP_TOKEN>`
+- **Endpoint (web apps, token in URL):** `https://timepass-al0s.onrender.com/mcp/<MCP_TOKEN>`  ← use this for claude.ai & ChatGPT with "No sign-in"
+- **Endpoint (header auth):** `https://timepass-al0s.onrender.com/mcp` with header `Authorization: Bearer <MCP_TOKEN>`  ← use this for Claude Code / Desktop
 - **Built with:** the official [`laravel/mcp`](https://laravel.com/docs/12.x/mcp) package (runs inside the app, shares the live database)
 
 ## Available tools
@@ -58,17 +58,18 @@ Add to your MCP client config (e.g. `claude_desktop_config.json`):
 }
 ```
 
-**claude.ai (web) custom connector:** add the connector with the URL above.
-If the web UI only offers OAuth (no header field), see **Auth note** below.
+**claude.ai (web) custom connector** — use the **token-in-URL** method:
+- **URL:** `https://timepass-al0s.onrender.com/mcp/mcp_xxxxxxxxxxxx` (the token is the last path segment)
+- **Authentication:** choose **"No sign-in"**
+- Expand **Advanced** → Transport: **Streamable HTTP** → **Add**
 
 ---
 
 ## 3. Connect from ChatGPT
 
 ChatGPT → **Settings → Connectors / Developer mode → Add custom connector (MCP)**:
-- **URL:** `https://timepass-al0s.onrender.com/mcp`
-- **Authentication:** set an HTTP header `Authorization: Bearer mcp_xxxxxxxxxxxx`
-  (use the header/bearer option in the connector dialog).
+- **URL:** `https://timepass-al0s.onrender.com/mcp/mcp_xxxxxxxxxxxx` (token in the URL)
+- **Authentication:** **No authentication**
 
 ---
 

@@ -19,7 +19,13 @@ class McpTokenAuth
     public function handle(Request $request, Closure $next): Response
     {
         $expected = (string) config('services.mcp.token');
-        $provided = (string) $request->bearerToken();
+
+        // Accept the token from the URL path (/mcp/{token}), the Authorization
+        // bearer header, or a ?token= query string — whichever the client sends.
+        $provided = (string) ($request->route('token')
+            ?? $request->bearerToken()
+            ?? $request->query('token')
+            ?? '');
 
         if ($expected === '' || $provided === '' || ! hash_equals($expected, $provided)) {
             abort(401, 'Invalid or missing MCP token.');
