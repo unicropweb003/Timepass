@@ -55,7 +55,7 @@ class AccountDemoSeeder extends Seeder
             $placed = now()->subDays($daysAgo)->setTime(11, 30);
             $subtotal = collect($items)->sum(fn ($item) => $item[3] * $item[4]);
             $shipping = $subtotal >= 499 ? 0 : 49;
-            $number = 'TP' . $placed->format('ymd') . str_pad((string) ($user->id * 10 + $i), 4, '0', STR_PAD_LEFT);
+            $number = 'TP'.$placed->format('ymd').str_pad((string) ($user->id * 10 + $i), 4, '0', STR_PAD_LEFT);
 
             $order = $user->orders()->firstOrCreate(['order_number' => $number], [
                 'status' => $status,
@@ -67,7 +67,7 @@ class AccountDemoSeeder extends Seeder
                 'shipping_phone' => $address->phone,
                 'shipping_address' => $address->oneLine(),
                 'courier' => $status === 'cancelled' ? null : 'BlueDart',
-                'tracking_number' => $status === 'cancelled' ? null : 'BD' . random_int(100000000, 999999999),
+                'tracking_number' => $status === 'cancelled' ? null : 'BD'.random_int(100000000, 999999999),
                 'expected_delivery' => $placed->copy()->addDays(5),
                 'packed_at' => $status !== 'cancelled' ? $placed->copy()->addHours(6) : null,
                 'shipped_at' => in_array($status, ['shipped', 'delivered']) ? $placed->copy()->addDay() : null,
@@ -84,7 +84,7 @@ class AccountDemoSeeder extends Seeder
                 if ($payment !== 'Cash on Delivery') {
                     $user->transactions()->create([
                         'order_id' => $order->id,
-                        'reference' => 'TXN' . $placed->format('ymdHis') . $i,
+                        'reference' => 'TXN'.$placed->format('ymdHis').$i,
                         'method' => $payment,
                         'amount' => $order->total,
                     ])->forceFill(['created_at' => $placed])->save();

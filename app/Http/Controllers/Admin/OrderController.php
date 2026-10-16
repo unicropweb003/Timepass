@@ -35,7 +35,7 @@ class OrderController extends Controller
     public function updateStatus(Request $request, Order $order)
     {
         $data = $request->validate([
-            'status' => ['required', 'string', 'in:' . implode(',', [...array_keys(Order::STEPS), 'cancelled'])],
+            'status' => ['required', 'string', 'in:'.implode(',', [...array_keys(Order::STEPS), 'cancelled'])],
         ]);
 
         $order->status = $data['status'];
@@ -52,6 +52,6 @@ class OrderController extends Controller
 
         $order->save();
 
-        return back()->with('status', 'Order status updated to ' . $order->statusLabel() . '.');
+        return back()->with('status', 'Order status updated to '.$order->statusLabel().'.');
     }
 }

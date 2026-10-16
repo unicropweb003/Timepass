@@ -42,6 +42,7 @@ class DashboardController extends Controller
 
         $days = collect(range(6, 0))->map(function ($i) use ($trend) {
             $date = now()->subDays($i)->toDateString();
+
             return ['label' => now()->subDays($i)->format('D'), 'count' => (int) ($trend[$date] ?? 0)];
         });
 

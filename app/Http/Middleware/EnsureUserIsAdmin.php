@@ -15,6 +15,7 @@ class EnsureUserIsAdmin
 
         if (! $user || ! $user->is_admin || $user->is_blocked) {
             Auth::logout();
+
             return redirect()->route('admin.login')
                 ->withErrors(['email' => 'You must sign in as an administrator.']);
         }

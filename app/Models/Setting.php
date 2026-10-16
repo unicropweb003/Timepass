@@ -8,7 +8,9 @@ use Illuminate\Support\Facades\Schema;
 class Setting extends Model
 {
     protected $primaryKey = 'key';
+
     public $incrementing = false;
+
     protected $keyType = 'string';
 
     protected $fillable = ['key', 'value'];
@@ -21,6 +23,7 @@ class Setting extends Model
             return $default;
         }
         $decoded = json_decode((string) $row->value, true);
+
         return json_last_error() === JSON_ERROR_NONE ? $decoded : $row->value;
     }
 
@@ -36,6 +39,7 @@ class Setting extends Model
         if (! Schema::hasTable('settings')) {
             return [];
         }
+
         return static::all()->mapWithKeys(fn ($r) => [
             $r->key => json_decode((string) $r->value, true),
         ])->all();

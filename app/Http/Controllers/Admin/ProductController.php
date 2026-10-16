@@ -114,7 +114,8 @@ class ProductController extends Controller
             // avoids the browser showing a cached old image after a re-upload.
             $name = $this->uniqueImageName($slug, $ext);
             $file->move(public_path('images/products'), $name);
-            return 'images/products/' . $name;
+
+            return 'images/products/'.$name;
         }
 
         return $product?->image;
@@ -123,11 +124,12 @@ class ProductController extends Controller
     private function uniqueImageName(string $slug, string $ext): string
     {
         $base = Str::slug($slug) ?: 'product';
-        $name = $base . '.' . $ext;
+        $name = $base.'.'.$ext;
         // Collision guard: only add a suffix if a file with that name already exists.
-        if (file_exists(public_path('images/products/' . $name))) {
-            $name = $base . '-' . now()->format('YmdHis') . '.' . $ext;
+        if (file_exists(public_path('images/products/'.$name))) {
+            $name = $base.'-'.now()->format('YmdHis').'.'.$ext;
         }
+
         return $name;
     }
 
@@ -144,8 +146,9 @@ class ProductController extends Controller
         $slug = $base;
         $i = 1;
         while (Product::where('slug', $slug)->when($ignoreId, fn ($q) => $q->where('id', '!=', $ignoreId))->exists()) {
-            $slug = $base . '-' . (++$i);
+            $slug = $base.'-'.(++$i);
         }
+
         return $slug;
     }
 }

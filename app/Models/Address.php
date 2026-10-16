@@ -28,7 +28,7 @@ class Address extends Model
      */
     public function oneLine(): string
     {
-        return collect([$this->line1, $this->line2, $this->city, $this->state . ' - ' . $this->pincode])
+        return collect([$this->line1, $this->line2, $this->city, $this->state.' - '.$this->pincode])
             ->filter()
             ->implode(', ');
     }

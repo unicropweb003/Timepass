@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ContactMessage;
+use App\Models\Review;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
@@ -163,7 +165,7 @@ class ShopController extends Controller
         ];
 
         try {
-            $dbReviews = \App\Models\Review::where('is_active', true)
+            $dbReviews = Review::where('is_active', true)
                 ->orderBy('sort_order')->orderBy('id')
                 ->get(['name', 'tagline', 'rating', 'text']);
 
@@ -214,7 +216,7 @@ class ShopController extends Controller
         $counts = [
             'all' => $forCategories->count(),
             'categories' => $forCategories->countBy('category_slug')->all(),
-            'types' => $forCategories->countBy(fn ($p) => $p['category_slug'] . '/' . $p['type_slug'])->all(),
+            'types' => $forCategories->countBy(fn ($p) => $p['category_slug'].'/'.$p['type_slug'])->all(),
             'forms' => $catalog->filter($inCategory)->filter($inPrice)->countBy('form_slug')->all(),
         ];
 
@@ -245,6 +247,7 @@ class ShopController extends Controller
             ->filter(fn ($p) => isset($categories[$p['category']]['types'][$p['type']]))
             ->map(function ($p) {
                 $slug = $p['slug'] ?? Str::slug($p['name']);
+
                 return $p + [
                     'slug' => $slug,
                     'category_slug' => $p['category'],
@@ -314,7 +317,7 @@ class ShopController extends Controller
             'message' => ['required', 'string', 'min:5'],
         ]);
 
-        \App\Models\ContactMessage::create($data);
+        ContactMessage::create($data);
 
         return back()->with('status', 'Thanks! Your message has been sent.');
     }

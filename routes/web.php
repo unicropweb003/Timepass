@@ -1,9 +1,6 @@
 <?php
 
 use App\Http\Controllers\AccountController;
-use App\Http\Controllers\AuthController;
-use App\Http\Controllers\ShopController;
-use App\Http\Controllers\WishlistController;
 use App\Http\Controllers\Admin\AuthController as AdminAuthController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\ContactMessageController;
@@ -15,6 +12,9 @@ use App\Http\Controllers\Admin\ReviewController;
 use App\Http\Controllers\Admin\SettingController;
 use App\Http\Controllers\Admin\TransactionController;
 use App\Http\Controllers\Admin\WishlistController as AdminWishlistController;
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\ShopController;
+use App\Http\Controllers\WishlistController;
 use Illuminate\Support\Facades\Route;
 
 // Public shop pages.

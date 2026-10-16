@@ -58,7 +58,7 @@ class CategoryController extends Controller
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'slug' => ['nullable', 'string', 'max:255', 'alpha_dash',
-                'unique:categories,slug' . ($category ? ',' . $category->id : '')],
+                'unique:categories,slug'.($category ? ','.$category->id : '')],
             'description' => ['nullable', 'string', 'max:255'],
             'icon' => ['nullable', 'string'],
             'types_text' => ['nullable', 'string'],
@@ -102,8 +102,9 @@ class CategoryController extends Controller
         $slug = $base;
         $i = 1;
         while (Category::where('slug', $slug)->exists()) {
-            $slug = $base . '-' . (++$i);
+            $slug = $base.'-'.(++$i);
         }
+
         return $slug;
     }
 }

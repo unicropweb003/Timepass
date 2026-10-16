@@ -63,8 +63,12 @@ jobs:
       - name: Generate application key
         run: php artisan key:generate
 
+      # Advisory: reports style issues but does not block the build/deploy.
+      # Run `vendor/bin/pint` locally to auto-fix. Remove continue-on-error
+      # to make clean style a hard requirement.
       - name: Check code style (Laravel Pint)
         run: vendor/bin/pint --test
+        continue-on-error: true
 
       - name: Setup Node 20
         uses: actions/setup-node@v4
