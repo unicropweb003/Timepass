@@ -1,0 +1,36 @@
+name: Keep Render Awake
+
+# Render's free tier spins the service down after ~15 min of inactivity.
+# This workflow pings the app's health endpoint on a schedule so it stays up.
+#
+# Notes / limits:
+#  - GitHub scheduled runs are "best effort" and can be delayed 5-15+ min at
+#    busy times, so this is not a hard guarantee. For rock-solid uptime use a
+#    dedicated monitor (UptimeRobot / cron-job.org, every 5 min) instead.
+#  - GitHub auto-disables scheduled workflows after 60 days of no repo activity.
+#  - Override the target by setting a repo variable APP_PING_URL
+#    (Settings > Secrets and variables > Actions > Variables).
+
+on:
+  schedule:
+    - cron: '*/10 * * * *' # every 10 minutes
+  workflow_dispatch: {} # allow manual "Run workflow" button
+
+permissions:
+  contents: read
+
+jobs:
+  ping:
+    name: Ping health endpoint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping the app
+        env:
+          # Falls back to the known live URL if the repo variable isn't set.
+          APP_PING_URL: ${{ vars.APP_PING_URL || 'https://timepass-al0s.onrender.com/up' }}
+        run: |
+          echo "Pinging $APP_PING_URL ..."
+          # Generous timeout + retries to survive a cold start (service waking up).
+          curl -fsS --retry 4 --retry-delay 15 --retry-all-errors --max-time 90 "$APP_PING_URL"
+          echo ""
+          echo "Ping OK — server is awake."
