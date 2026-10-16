@@ -41,4 +41,10 @@ return [
         'redirect' => env('GOOGLE_REDIRECT_URI', '/admin/auth/google/callback'),
     ],
 
+    // Secret bearer token that protects the MCP server (set MCP_TOKEN in the
+    // environment). AI clients must send: Authorization: Bearer <MCP_TOKEN>.
+    'mcp' => [
+        'token' => env('MCP_TOKEN'),
+    ],
+
 ];
