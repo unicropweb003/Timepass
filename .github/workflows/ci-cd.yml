@@ -39,7 +39,7 @@ jobs:
           php-version: '8.3'
           # pdo_sqlite/sqlite3 are required by the test suite (in-memory DB).
           # pdo_pgsql matches production (Neon Postgres).
-          extensions: mbstring, dom, fileinfo, pdo, pdo_sqlite, sqlite3, pdo_pgsql, zip, bcmath, intl
+          extensions: mbstring, dom, fileinfo, pdo, pdo_sqlite, sqlite3, pdo_pgsql, zip, bcmath, intl, gd
           coverage: none
           tools: composer:v2
 

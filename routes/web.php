@@ -13,18 +13,26 @@ use App\Http\Controllers\Admin\SettingController;
 use App\Http\Controllers\Admin\TransactionController;
 use App\Http\Controllers\Admin\WishlistController as AdminWishlistController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\McpUploadController;
 use App\Http\Controllers\ShopController;
 use App\Http\Controllers\WishlistController;
+use App\Http\Middleware\McpTokenAuth;
 use App\Models\Media;
 use Illuminate\Support\Facades\Route;
 
-// Images stored in the database (uploaded via the MCP set_product_image tool).
+// Images stored in the database (AI-generated or uploaded via the MCP tools).
 Route::get('/media/{media}', function (Media $media) {
     return response(base64_decode($media->data), 200, [
         'Content-Type' => $media->mime,
         'Cache-Control' => 'public, max-age=31536000, immutable',
     ]);
 })->whereNumber('media')->name('media.show');
+
+// MCP image upload: returns an upload_id (15 min) for image_upload_id.
+// Token via Authorization: Bearer, ?token=, or /upload/<token>. CSRF-exempt (see bootstrap/app.php).
+Route::post('/upload/{token?}', [McpUploadController::class, 'store'])
+    ->middleware([McpTokenAuth::class, 'throttle:30,1'])
+    ->name('mcp.upload');
 
 // Public shop pages.
 Route::get('/', [ShopController::class, 'home'])->name('home');

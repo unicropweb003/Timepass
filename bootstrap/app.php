@@ -13,6 +13,8 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->trustProxies(at: '*');
+        // MCP image upload is called by API clients with a bearer token, not a browser form.
+        $middleware->validateCsrfTokens(except: ['upload', 'upload/*']);
         $middleware->alias([
             'admin' => EnsureUserIsAdmin::class,
         ]);

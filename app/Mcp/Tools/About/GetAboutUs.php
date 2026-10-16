@@ -1,8 +1,9 @@
 <?php
 
-namespace App\Mcp\Tools\Settings;
+namespace App\Mcp\Tools\About;
 
-use App\Models\Setting;
+use App\Mcp\Support\Present;
+use App\Mcp\Support\SiteContent;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Laravel\Mcp\Request;
 use Laravel\Mcp\Response;
@@ -11,17 +12,14 @@ use Laravel\Mcp\Server\Attributes\Name;
 use Laravel\Mcp\Server\Tool;
 use Laravel\Mcp\Server\Tools\Annotations\IsReadOnly;
 
-#[Name('get_settings')]
-#[Description('Get the storefront contact details and social links currently shown on the site.')]
+#[Name('get_about_us')]
+#[Description('Get the About Us page content (title, content, image) currently shown on the website.')]
 #[IsReadOnly]
-class GetSettings extends Tool
+class GetAboutUs extends Tool
 {
     public function handle(Request $request): Response
     {
-        return Response::json([
-            'contact' => Setting::get('contact', []),
-            'social' => Setting::get('social', []),
-        ]);
+        return Present::reply('Current About Us content.', SiteContent::presentAbout());
     }
 
     public function schema(JsonSchema $schema): array

@@ -3,11 +3,12 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Category extends Model
 {
     protected $fillable = [
-        'name', 'slug', 'description', 'icon', 'types', 'sort_order', 'is_active',
+        'parent_id', 'name', 'slug', 'description', 'icon', 'image', 'types', 'sort_order', 'is_active',
     ];
 
     protected function casts(): array
@@ -15,7 +16,13 @@ class Category extends Model
         return [
             'types' => 'array',
             'is_active' => 'boolean',
+            'parent_id' => 'integer',
         ];
+    }
+
+    public function parent(): BelongsTo
+    {
+        return $this->belongsTo(Category::class, 'parent_id');
     }
 
     /**

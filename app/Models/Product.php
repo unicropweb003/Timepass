@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class Product extends Model
 {
     protected $fillable = [
-        'name', 'slug', 'category', 'type', 'form', 'price', 'mrp',
+        'name', 'slug', 'category', 'type', 'form', 'price', 'mrp', 'stock',
         'description', 'details', 'rating', 'reviews', 'image', 'tags',
         'is_active', 'sort_order',
     ];
@@ -18,6 +18,7 @@ class Product extends Model
             'tags' => 'array',
             'rating' => 'float',
             'is_active' => 'boolean',
+            'stock' => 'integer',
         ];
     }
 

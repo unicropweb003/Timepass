@@ -1,113 +1,170 @@
 # TimePass MCP Server
 
-This project ships an **MCP (Model Context Protocol) server** so AI clients like
-**ChatGPT** and **Claude** can manage the storefront content directly —
-create / update / delete **products, categories, reviews**, and edit the site
-**settings** (contact details + social links).
+An MCP (Model Context Protocol) server built into the TimePass Laravel app. AI clients (Claude, ChatGPT) can manage the store's content with **one natural-language request**, for example:
 
-- **Endpoint (web apps, token in URL):** `https://timepass-al0s.onrender.com/mcp/<MCP_TOKEN>`  ← use this for claude.ai & ChatGPT with "No sign-in"
-- **Endpoint (header auth):** `https://timepass-al0s.onrender.com/mcp` with header `Authorization: Bearer <MCP_TOKEN>`  ← use this for Claude Code / Desktop
-- **Built with:** the official [`laravel/mcp`](https://laravel.com/docs/12.x/mcp) package (runs inside the app, shares the live database)
+> Add product "Blue Cotton Shirt", price 799, category Men's Wear
 
-## Available tools
+That single call creates the category if it is missing, creates the product, generates an AI product photo, resizes it, converts it to WebP and stores it. The product then shows on the website.
+
+It runs inside the existing app. It uses the same Postgres (Neon) database and the same Render deploy, and needs no separate service.
+
+## Design choices
+
+| Spec item | Implementation | Why |
+|---|---|---|
+| Python/FastMCP or TypeScript SDK | **PHP, official `laravel/mcp`** | Reuses the existing tables and models directly, with one deploy. |
+| Google Imagen | **Google Gemini image model** (`gemini-3.1-flash-lite-image`, configurable) | Google has retired Imagen from the Gemini API. If no key is set, it falls back to free Pollinations. |
+| Image storage | **Database** (`media` table, served at `/media/{id}`) | Free, and survives Render's ephemeral disk. |
+| Pydantic/Zod validation | Laravel validator | Native to the stack, with AI-readable error messages. |
+| Update default image source "ai" | Update tools default to **"keep"** | An unrelated edit (for example a price change) never replaces a photo by accident. Pass `image_source: "ai"` for a new one. |
+| `sale_price` / `category_id` / `status` | Mapped onto existing columns | The site stores the selling price in `price` and the struck-through price in `mrp`. Products link to categories by slug. `status` maps to `is_active`. |
+
+## Folder structure
+
+```
+app/
+  Mcp/
+    Servers/StoreServer.php          # registers all tools + instructions
+    Support/
+      ImagePipeline.php              # ai | url | upload | local -> validate -> resize/WebP -> store
+      ImageGenerator.php             # Gemini (Interactions + generateContent) -> Pollinations fallback
+      SafeDownloader.php             # https-only, SSRF-safe, 5 MB cap, re-checked redirects
+      ImageInput.php                 # shared image_* fields for create/update tools
+      Finder.php                     # find by id | slug | exact name, unique slugs
+      CategoryInput.php              # category_name -> existing or auto-created category
+      Present.php                    # record shapes + "summary + JSON" replies
+      SiteContent.php                # About Us + contact info (settings)
+    Tools/
+      Products/   Create, Update, Delete, Get, List
+      Categories/ Create, Update, Delete, Get, List
+      About/      GetAboutUs, UpdateAboutUs
+      Contact/    GetContactInfo, UpdateContactInfo, List/Get/DeleteContactMessage
+      Reviews/    List, Create, Update, Delete
+  Http/
+    Controllers/McpUploadController.php   # POST /upload -> upload_id (15 min)
+    Middleware/McpTokenAuth.php           # bearer / path / query token
+    Middleware/LogMcpRequests.php         # one log line per call, no secrets
+  Models/Media.php
+database/migrations/
+  2026_10_16_000001_change_products_image_to_text.php
+  2026_10_16_000002_create_media_table.php
+  2026_10_16_000003_add_stock_and_category_hierarchy.php
+routes/ai.php                        # /mcp, /mcp/{token} (HTTP) + "timepass" (stdio)
+tests/Feature/Mcp/StoreServerTest.php
+```
+
+## Tools (21)
 
 | Module | Tools |
-|--------|-------|
-| Products | `list_products`, `create_product`, `update_product`, `delete_product`, `set_product_image` (upload from a link or base64), `generate_product_image` (AI image) |
-| Categories | `list_categories`, `create_category`, `update_category`, `delete_category` |
+|---|---|
+| Products | `create_product`, `update_product`, `delete_product`, `get_product`, `list_products` |
+| Categories | `create_category`, `update_category`, `delete_category`, `get_category`, `list_categories` |
+| About Us | `get_about_us`, `update_about_us` |
+| Contact | `get_contact_info`, `update_contact_info`, `list_contact_messages`, `get_contact_message`, `delete_contact_message` |
 | Reviews | `list_reviews`, `create_review`, `update_review`, `delete_review` |
-| Settings | `get_settings`, `update_settings` |
 
-Changes write to the database and appear on the website immediately. Deletes are
-permanent. (The admin panel itself is not exposed — only the public content.)
+- `create_product` takes `category_name`. If the category doesn't exist, it is created.
+- Get, update and delete accept an **id, slug or exact name** (`product` / `category`).
+- Every `delete_*` needs **`confirm: true`** and also deletes the stored image. `delete_category` refuses while it still has products, unless you pass `move_products_to`.
+- `list_*` tools support `search`, filters and `page` / `per_page`.
+- Every tool replies with a short summary plus the saved record as JSON.
 
----
+## Image handling
 
-## 1. One-time setup — set the secret token
+Create and update tools for products and categories, plus `update_about_us`, accept:
 
-Pick a strong token (example generator):
+| Field | Meaning |
+|---|---|
+| `image_source` | `ai` · `url` · `upload` · `none` (no image / remove) · `keep`. Create defaults to **ai**, update defaults to **keep**. It is inferred automatically when you pass `image_url` or `image_upload_id`. |
+| `image_prompt` | Optional. If missing, a prompt is built from the name and description. Product prompts ask for a packshot with no people. |
+| `image_url` | Downloaded server-side, then re-hosted. Never hotlinked. |
+| `image_upload_id` | From `POST /upload`, valid for 15 minutes. |
+| `image_base64` + `image_filename` | For small images. |
+| `local_path` | Only in local stdio mode. |
+
+Rules:
+- URLs must be **https**. Hosts that resolve to localhost or private/reserved IPs are blocked, including after redirects (max 3).
+- Images are capped at **5 MB**.
+- Only **JPEG, PNG and WebP** are accepted, checked by **magic bytes** rather than the extension.
+- Every image is resized to **max 1200px wide** and converted to **WebP** (quality 82).
+- Replacing an image **deletes the old stored file**.
+- If generation or download fails, **the record is still saved** without an image, and the reply says `Image NOT saved: <reason>`.
+
+### Upload endpoint
+
 ```bash
-php -r "echo 'mcp_'.bin2hex(random_bytes(24));"
+curl -X POST https://timepass-al0s.onrender.com/upload \
+  -H "Authorization: Bearer $MCP_TOKEN" \
+  -F "file=@shirt.jpg"
+# -> {"upload_id":"9f2c…","expires_at":"…"}   then pass image_upload_id to a tool
 ```
 
-Add it in **two** places (they must match):
+It also accepts JSON `{"image_base64": "..."}`, and the token can be sent as `?token=` or as `/upload/<token>`.
 
-1. **Render** → your service → **Environment** → add
-   `MCP_TOKEN = mcp_xxxxxxxxxxxxxxxxxxxx` → Save (redeploys).
-2. **Local `.env`** (optional, only if you test locally) → `MCP_TOKEN=mcp_xxxx...`
+## Setup
 
-> Keep this token secret — anyone with it can edit your store content.
-> To rotate it, change `MCP_TOKEN` on Render and update it in your AI client.
+Add these to your `.env` locally, and to **Render → Environment** in production:
 
----
+| Variable | Required | Notes |
+|---|---|---|
+| `MCP_TOKEN` | **yes** | Long random secret: `php -r "echo 'mcp_'.bin2hex(random_bytes(24));"` |
+| `GEMINI_API_KEY` | recommended | [aistudio.google.com/apikey](https://aistudio.google.com/apikey). Billing must be enabled for image models. |
+| `GEMINI_IMAGE_MODEL` | no | Default `gemini-3.1-flash-lite-image` (cheapest). Alternative: `gemini-nano-banana-2.1`. |
+| `POLLINATIONS_TOKEN` | no | Only used by the free fallback. Removes its watermark and 45-second limit. |
 
-## 2. Connect from Claude
+Then deploy:
 
-**Claude Desktop / Claude Code** (supports custom headers):
+1. `git push` to `main`. GitHub Actions runs the tests, then triggers the Render deploy.
+2. The container runs `php artisan migrate --force`, which creates the new columns and the `media` table, then starts the app.
+3. If you added variables on Render, Render redeploys automatically.
 
-Add to your MCP client config (e.g. `claude_desktop_config.json`):
+The Docker image includes GD with WebP support for resizing and conversion.
+
+## Connecting AI clients
+
+**claude.ai (web)**: Settings → Connectors → Add custom connector
+- URL: `https://timepass-al0s.onrender.com/mcp/<MCP_TOKEN>`
+- Authentication: **No sign-in**
+- After adding or changing tools, remove and re-add the connector, then start a **new chat** so Claude reloads the tool list.
+
+**ChatGPT**: Settings → Connectors (Developer mode) → Add MCP connector. Use the same URL with **No authentication**.
+
+**Claude Desktop / Claude Code**, using the header token:
+```bash
+claude mcp add --transport http timepass https://timepass-al0s.onrender.com/mcp \
+  --header "Authorization: Bearer <MCP_TOKEN>"
+```
+
+**Local (stdio)**, from this project folder:
 ```json
-{
-  "mcpServers": {
-    "timepass": {
-      "type": "http",
-      "url": "https://timepass-al0s.onrender.com/mcp",
-      "headers": { "Authorization": "Bearer mcp_xxxxxxxxxxxx" }
-    }
-  }
-}
+{ "mcpServers": { "timepass-local": {
+    "command": "php", "args": ["artisan", "mcp:start", "timepass"],
+    "cwd": "C:/Users/unicr/TimePass"
+} } }
 ```
+Note: locally `.env` points at the **live** Neon database, so local stdio edits change the live site.
 
-**claude.ai (web) custom connector** — use the **token-in-URL** method:
-- **URL:** `https://timepass-al0s.onrender.com/mcp/mcp_xxxxxxxxxxxx` (the token is the last path segment)
-- **Authentication:** choose **"No sign-in"**
-- Expand **Advanced** → Transport: **Streamable HTTP** → **Add**
+**Test with MCP Inspector**: `php artisan mcp:inspector`
 
----
+## Security notes
 
-## 3. Connect from ChatGPT
+- Every HTTP request needs the token. Comparison is timing-safe (`hash_equals`).
+- Rate limits: MCP 60 requests/min, `/upload` 30 requests/min.
+- Logs contain one line per call (method, tool, status, duration). They never include the token, the arguments or the image data.
+- **Caveat:** in the `/mcp/<token>` URL form, the token is part of the path, so any HTTP access log that records URLs (for example Render's request log) can contain it. Prefer the header form where your client supports it, and rotate `MCP_TOKEN` if a log is ever shared.
 
-ChatGPT → **Settings → Connectors / Developer mode → Add custom connector (MCP)**:
-- **URL:** `https://timepass-al0s.onrender.com/mcp/mcp_xxxxxxxxxxxx` (token in the URL)
-- **Authentication:** **No authentication**
+## Tests
 
----
-
-## 4. Test it before connecting (recommended)
-
-Use the built-in MCP Inspector:
 ```bash
-php artisan mcp:inspector
-```
-Point it at the `/mcp` URL with the `Authorization: Bearer` header and confirm the
-14 tools list. You can also smoke-test with curl:
-```bash
-curl -s https://timepass-al0s.onrender.com/mcp \
-  -H "Authorization: Bearer mcp_xxxxxxxxxxxx" \
-  -H "Content-Type: application/json" \
-  -H "Accept: application/json, text/event-stream" \
-  -d '{"jsonrpc":"2.0","id":1,"method":"tools/list"}'
+php artisan test --filter=StoreServerTest
 ```
 
----
+These cover: create with AI image (WebP conversion, served from `/media`), create with URL image (re-hosted), create with upload id, upload requiring a token, update (new image replaces and deletes the old one), delete (confirm required, image removed), auto-create versus reuse of a category, image failure still saving the record, SSRF and http blocking, non-image rejection, the Gemini provider, list filters, category delete moving products, and About/Contact updates. All external HTTP is faked.
 
-## Auth note (bearer token vs OAuth)
+## 5 example prompts
 
-This server uses a **secret bearer token** — simple and works with Claude
-Desktop/Code, the MCP Inspector, ChatGPT's custom connector, and any script that
-can send an `Authorization` header.
-
-Some **web connector UIs (claude.ai, ChatGPT) expect OAuth 2.1** instead of a
-static header. If your client won't accept a bearer token, the server can be
-upgraded to OAuth with **Laravel Passport** (a larger change — adds Passport,
-signing keys, and extra Render config). Ask and it can be added.
-
----
-
-## Example prompts once connected
-
-- "List all products in the `pens` category."
-- "Create a product: name 'Blue Gel Pen', category 'pens', price 25, mrp 40, tags best-seller."
-- "Mark product id 12 as inactive."
-- "Delete review id 5."
-- "Update the contact settings: set phone to +91 90000 00000."
+1. `Add product "Blue Cotton Shirt", price 799, sale price 649, stock 25, category Men's Wear.`
+2. `Create a product "Vitamin C Face Wash" for ₹349 in Skin Care using this photo: https://example.com/facewash.jpg`
+3. `Give the Keratin Cream product a new AI image of a white cream jar with a gold lid.`
+4. `Update the About Us page title to "Our Story" and write a short paragraph about our natural beauty products, with an AI image.`
+5. `Change our contact phone to +91 90000 00000, add Instagram https://instagram.com/timepass, then show me the unread contact messages.`

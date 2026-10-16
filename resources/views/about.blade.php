@@ -6,6 +6,12 @@
     $contact = config('shop.contact', []);
     $productCounts = collect(config('products', []))->countBy('category');
 
+    // Editable via the MCP update_about_us tool; falls back to the default copy.
+    $about = config('shop.about', []);
+    $aboutTitle = $about['title'] ?? 'Beauty essentials for your everyday self-care';
+    $aboutContent = $about['content'] ?? 'Your one-stop beauty store for skin care, hair care, makeup, fragrances and more — trusted products at honest prices, so self-care feels simple and joyful.';
+    $aboutImage = $about['image'] ?? null;
+
     // A distinct colour per category (matches the product image tiles).
     $palette = [
         'skin-care'         => ['#6366f1', '#8b5cf6'],
@@ -56,12 +62,9 @@
                     <span aria-hidden="true">✨</span> About TimePass
                 </span>
                 <h1 class="mt-4 text-2xl font-black leading-[1.15] tracking-tight sm:text-3xl">
-                    Beauty essentials for your everyday self-care
+                    {{ $aboutTitle }}
                 </h1>
-                <p class="mt-3 max-w-xl text-sm leading-relaxed text-white/90">
-                    Your one-stop beauty store for skin care, hair care, makeup, fragrances and more —
-                    trusted products at honest prices, so self-care feels simple and joyful.
-                </p>
+                <p class="mt-3 max-w-xl whitespace-pre-line text-sm leading-relaxed text-white/90">{{ $aboutContent }}</p>
                 <div class="mt-6 flex flex-wrap gap-3">
                     <a href="{{ route('products') }}"
                        class="inline-flex items-center gap-2 rounded-full bg-white px-6 py-3 text-sm font-bold text-indigo-700 shadow-lg transition hover:-translate-y-0.5 hover:shadow-xl">
@@ -92,6 +95,14 @@
             </div>
         </div>
     </section>
+
+    {{-- Optional About image (set via the MCP update_about_us tool) --}}
+    @if ($aboutImage)
+        <section class="overflow-hidden rounded-3xl shadow-xl ring-1 ring-gray-200">
+            <img src="{{ asset($aboutImage) }}" alt="{{ $aboutTitle }}" class="h-64 w-full object-cover sm:h-80" loading="lazy"
+                 onerror="this.closest('section').remove()">
+        </section>
+    @endif
 
     {{-- Stats --}}
     <section class="grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-4">

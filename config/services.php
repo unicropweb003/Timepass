@@ -47,8 +47,14 @@ return [
         'token' => env('MCP_TOKEN'),
     ],
 
-    // Optional key for unlimited AI image generation (enter.pollinations.ai).
-    // Without it the free tier allows about one image every 45 seconds.
+    // AI image generation for MCP tools. Google Gemini image models are used
+    // when GEMINI_API_KEY is set (Imagen was retired by Google); otherwise the
+    // free Pollinations service (about 1 image / 45 s, small watermark).
+    'gemini' => [
+        'key' => env('GEMINI_API_KEY'),
+        'image_model' => env('GEMINI_IMAGE_MODEL', 'gemini-3.1-flash-lite-image'),
+    ],
+
     'pollinations' => [
         'token' => env('POLLINATIONS_TOKEN'),
     ],

@@ -74,5 +74,8 @@ class ShopDataServiceProvider extends ServiceProvider
         if (! empty($settings['social']) && is_array($settings['social'])) {
             config(['shop.social' => array_merge(config('shop.social', []), $settings['social'])]);
         }
+        if (! empty($settings['about']) && is_array($settings['about'])) {
+            config(['shop.about' => $settings['about']]);
+        }
     }
 }
