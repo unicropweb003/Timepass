@@ -2,6 +2,7 @@
 
 namespace App\Mcp\Tools\Products;
 
+use App\Mcp\Support\ImagePath;
 use App\Models\Product;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Illuminate\Support\Str;
@@ -33,6 +34,10 @@ class CreateProduct extends Tool
             'is_active' => 'nullable|boolean',
             'sort_order' => 'nullable|integer|min:0',
         ]);
+
+        if ($problem = ImagePath::problem($data['image'] ?? null)) {
+            return Response::error($problem);
+        }
 
         $base = Str::slug($data['slug'] ?? $data['name']);
         $slug = $base !== '' ? $base : 'product';
@@ -72,7 +77,7 @@ class CreateProduct extends Tool
             'mrp' => $schema->integer()->description('Original price in rupees, shown struck-through.'),
             'description' => $schema->string()->description('Short product description.'),
             'details' => $schema->string()->description('Longer product details / specifications.'),
-            'image' => $schema->string()->description('Image path (under public/) or full image URL.'),
+            'image' => $schema->string()->description('Optional. A full public image URL. Never invent a file path; to upload a picture use set_product_image.'),
             'tags' => $schema->array()->items($schema->string())->description('Tags such as "best-seller" or "recommended".'),
             'is_active' => $schema->boolean()->description('Whether the product is visible on the site (default true).'),
             'sort_order' => $schema->integer()->description('Lower numbers appear first (default 0).'),

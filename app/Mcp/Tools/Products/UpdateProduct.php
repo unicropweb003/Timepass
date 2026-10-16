@@ -2,6 +2,7 @@
 
 namespace App\Mcp\Tools\Products;
 
+use App\Mcp\Support\ImagePath;
 use App\Models\Product;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Illuminate\Support\Str;
@@ -40,6 +41,10 @@ class UpdateProduct extends Tool
             return Response::error("No product found with id {$data['id']}.");
         }
 
+        if ($problem = ImagePath::problem($data['image'] ?? null)) {
+            return Response::error($problem);
+        }
+
         if (array_key_exists('slug', $data)) {
             $base = Str::slug($data['slug']);
             $slug = $base !== '' ? $base : $product->slug;
@@ -69,7 +74,7 @@ class UpdateProduct extends Tool
             'mrp' => $schema->integer()->description('Original price in rupees (struck-through).'),
             'description' => $schema->string()->description('Short description.'),
             'details' => $schema->string()->description('Longer details / specifications.'),
-            'image' => $schema->string()->description('Image path or URL.'),
+            'image' => $schema->string()->description('Optional. A full public image URL. Never invent a file path; to upload a picture use set_product_image.'),
             'tags' => $schema->array()->items($schema->string())->description('Replaces the full list of tags.'),
             'is_active' => $schema->boolean()->description('Show or hide the product on the site.'),
             'sort_order' => $schema->integer()->description('Lower numbers appear first.'),
