@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\ShopData;
 use Illuminate\Database\Eloquent\Model;
 
 class Review extends Model
@@ -16,5 +17,12 @@ class Review extends Model
             'rating' => 'integer',
             'is_active' => 'boolean',
         ];
+    }
+
+    /** Clear the cached storefront data whenever a review changes. */
+    protected static function booted(): void
+    {
+        static::saved(fn () => ShopData::flush());
+        static::deleted(fn () => ShopData::flush());
     }
 }

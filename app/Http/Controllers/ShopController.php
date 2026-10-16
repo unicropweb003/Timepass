@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\ContactMessage;
-use App\Models\Review;
+use App\Support\ShopData;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
@@ -164,21 +164,10 @@ class ShopController extends Controller
             ],
         ];
 
-        try {
-            $dbReviews = Review::where('is_active', true)
-                ->orderBy('sort_order')->orderBy('id')
-                ->get(['name', 'tagline', 'rating', 'text']);
-
-            if ($dbReviews->isNotEmpty()) {
-                $reviews = $dbReviews->map(fn ($r) => [
-                    'name' => $r->name,
-                    'tagline' => $r->tagline,
-                    'rating' => (int) $r->rating,
-                    'text' => $r->text,
-                ])->all();
-            }
-        } catch (\Throwable $e) {
-            // Table not migrated yet — keep the sample fallback above.
+        // Active reviews come from the cached storefront data (no query per page
+        // view). If the table is empty or not migrated, the samples above stay.
+        if ($dbReviews = ShopData::reviews()) {
+            $reviews = $dbReviews;
         }
 
         return view('home', compact('offer', 'promos', 'bestSellers', 'recommended', 'reviews', 'wideBanners', 'dualBanners'));

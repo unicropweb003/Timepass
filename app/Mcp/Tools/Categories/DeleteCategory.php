@@ -6,6 +6,7 @@ use App\Mcp\Support\Finder;
 use App\Mcp\Support\ImagePipeline;
 use App\Models\Category;
 use App\Models\Product;
+use App\Support\ShopData;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Laravel\Mcp\Request;
 use Laravel\Mcp\Response;
@@ -57,6 +58,7 @@ class DeleteCategory extends Tool
         $label = "#{$category->id} \"{$category->name}\"";
         ImagePipeline::deleteStored($category->image);
         $category->delete();
+        ShopData::flush(); // the bulk product/child updates above skip model events
 
         return Response::text("Deleted category {$label} and its stored image."
             .($target ? " Moved {$productCount} product(s) to \"{$target->name}\"." : '')

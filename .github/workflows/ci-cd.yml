@@ -128,13 +128,70 @@ jobs:
         continue-on-error: true
 
   # ─────────────────────────────────────────────────────────────
-  # 3. Deploy to Render — ONLY on push to main, ONLY after the
-  #    test + security jobs succeed. Triggered via a Render Deploy
-  #    Hook stored as a GitHub Actions secret.
+  # 3. HARD GATE: build the production Docker image exactly as Render
+  #    will, boot it (SQLite instead of Neon), and load the main pages.
+  #    Catches Dockerfile / PHP extension / startup errors before deploy.
+  # ─────────────────────────────────────────────────────────────
+  docker:
+    name: Docker image
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Build image
+        run: docker build -t timepass:ci .
+
+      - name: Check PHP extensions in the image
+        run: |
+          docker run --rm timepass:ci php -r '
+            $checks = [
+              "opcache"    => extension_loaded("Zend OPcache"),
+              "gd+webp"    => function_exists("imagewebp"),
+              "pdo_pgsql"  => extension_loaded("pdo_pgsql"),
+              "pdo_sqlite" => extension_loaded("pdo_sqlite"),
+            ];
+            foreach ($checks as $name => $ok) { echo str_pad($name, 12), $ok ? "ok" : "MISSING", PHP_EOL; }
+            exit(in_array(false, $checks, true) ? 1 : 0);'
+
+      - name: Boot the container and load pages
+        run: |
+          docker run -d --name app -p 10000:10000 \
+            -e APP_KEY="base64:$(openssl rand -base64 32)" \
+            -e APP_ENV=production -e APP_DEBUG=false \
+            -e DB_CONNECTION=sqlite -e DB_DATABASE=/tmp/ci.sqlite \
+            -e SESSION_DRIVER=file -e CACHE_STORE=file \
+            -e MCP_TOKEN=ci-token \
+            timepass:ci
+
+          for i in $(seq 1 90); do
+            curl -fsS -o /dev/null http://localhost:10000/up && { echo "up after ${i}s"; break; }
+            sleep 1
+          done
+
+          for path in / /products "/products?min_price=300&max_price=600" /about /contact; do
+            code=$(curl -s -o /dev/null -w "%{http_code}" "http://localhost:10000$path")
+            echo "$path -> $code"
+            [ "$code" = "200" ] || exit 1
+          done
+
+          echo "--- diagnostics ---"
+          curl -s -D - -o /dev/null -H "X-Timing: ci-token" http://localhost:10000/products | grep -iE "^(server-timing|x-timing-info):"
+          curl -s -D - -o /dev/null -H "X-Timing: ci-token" http://localhost:10000/products | grep -qi "opcache=on" || { echo "OPcache is not active in the web server"; exit 1; }
+
+      - name: Container logs
+        if: always()
+        run: docker logs app 2>&1 | tail -60 || true
+
+  # ─────────────────────────────────────────────────────────────
+  # 4. Deploy to Render — ONLY on push to main, ONLY after the
+  #    test, security and Docker jobs succeed. Triggered via a Render
+  #    Deploy Hook stored as a GitHub Actions secret.
   # ─────────────────────────────────────────────────────────────
   deploy:
     name: Deploy to Render
-    needs: [test, security]
+    needs: [test, security, docker]
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
 

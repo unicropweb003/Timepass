@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\AddServerTiming;
 use App\Http\Middleware\EnsureUserIsAdmin;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -15,6 +16,8 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->trustProxies(at: '*');
         // MCP image upload is called by API clients with a bearer token, not a browser form.
         $middleware->validateCsrfTokens(except: ['upload', 'upload/*']);
+        // Owner-only performance diagnostics (send "X-Timing: <MCP_TOKEN>").
+        $middleware->append(AddServerTiming::class);
         $middleware->alias([
             'admin' => EnsureUserIsAdmin::class,
         ]);

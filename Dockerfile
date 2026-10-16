@@ -9,11 +9,31 @@ FROM php:8.3-cli
 RUN apt-get update && apt-get install -y git unzip libpq-dev libzip-dev \
         libjpeg62-turbo-dev libpng-dev libwebp-dev \
     && docker-php-ext-configure gd --with-jpeg --with-webp \
-    && docker-php-ext-install pdo_pgsql zip gd \
+    && docker-php-ext-install pdo_pgsql zip gd opcache \
     && rm -rf /var/lib/apt/lists/*
+
+# Production PHP settings. OPcache keeps compiled code in memory so Laravel is
+# not re-compiled on every request (the code never changes inside the image,
+# so timestamp checks are off). The built-in server ("cli-server" SAPI) uses
+# opcache.enable; artisan commands (CLI) are unaffected.
+RUN { \
+        echo 'opcache.enable=1'; \
+        echo 'opcache.memory_consumption=128'; \
+        echo 'opcache.interned_strings_buffer=16'; \
+        echo 'opcache.max_accelerated_files=20000'; \
+        echo 'opcache.validate_timestamps=0'; \
+        echo 'realpath_cache_size=4096K'; \
+        echo 'realpath_cache_ttl=600'; \
+        echo 'expose_php=Off'; \
+    } > /usr/local/etc/php/conf.d/zz-production.ini
+
+# Serve requests in parallel: 4 worker processes instead of one at a time
+# (requires `serve --no-reload`).
+ENV PHP_CLI_SERVER_WORKERS=4
+
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 WORKDIR /var/www
 COPY . .
 COPY --from=assets /app/public/build public/build
 RUN composer install --no-dev --optimize-autoloader
-CMD sh -c "php artisan migrate --force && (php artisan db:seed --force || echo 'db:seed failed - starting anyway') && php artisan config:cache && php artisan route:cache && php artisan view:cache && php artisan serve --host=0.0.0.0 --port=${PORT:-10000}"
+CMD sh -c "php artisan migrate --force && (php artisan db:seed --force || echo 'db:seed failed - starting anyway') && php artisan config:cache && php artisan route:cache && php artisan view:cache && php artisan serve --no-reload --host=0.0.0.0 --port=${PORT:-10000}"

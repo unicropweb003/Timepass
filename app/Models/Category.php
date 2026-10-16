@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\ShopData;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -23,6 +24,13 @@ class Category extends Model
     public function parent(): BelongsTo
     {
         return $this->belongsTo(Category::class, 'parent_id');
+    }
+
+    /** Clear the cached storefront data whenever a category changes. */
+    protected static function booted(): void
+    {
+        static::saved(fn () => ShopData::flush());
+        static::deleted(fn () => ShopData::flush());
     }
 
     /**

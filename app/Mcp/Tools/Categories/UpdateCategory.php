@@ -8,6 +8,7 @@ use App\Mcp\Support\ImagePipeline;
 use App\Mcp\Support\Present;
 use App\Models\Category;
 use App\Models\Product;
+use App\Support\ShopData;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Laravel\Mcp\Request;
 use Laravel\Mcp\Response;
@@ -73,6 +74,7 @@ class UpdateCategory extends Tool
 
         if ($category->slug !== $oldSlug) {
             $moved = Product::where('category', $oldSlug)->update(['category' => $category->slug]);
+            ShopData::flush(); // bulk update skips model events
             $notes[] = "Slug changed to {$category->slug}; {$moved} product(s) moved with it.";
         }
 

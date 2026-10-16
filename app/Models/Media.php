@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Http\Controllers\MediaController;
 use Illuminate\Database\Eloquent\Model;
 
 /**
@@ -19,6 +20,16 @@ class Media extends Model
     protected function casts(): array
     {
         return ['expires_at' => 'datetime'];
+    }
+
+    /** Remove the on-disk copy served by MediaController when the image is deleted. */
+    protected static function booted(): void
+    {
+        static::deleted(function (Media $media) {
+            $path = MediaController::cachePath($media->id);
+            @unlink($path);
+            @unlink($path.'.mime');
+        });
     }
 
     /** Relative path stored on records (asset()/url() turn it into a full URL). */

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\ShopData;
 use Illuminate\Database\Eloquent\Model;
 
 class Product extends Model
@@ -20,6 +21,13 @@ class Product extends Model
             'is_active' => 'boolean',
             'stock' => 'integer',
         ];
+    }
+
+    /** Clear the cached storefront data whenever a product changes. */
+    protected static function booted(): void
+    {
+        static::saved(fn () => ShopData::flush());
+        static::deleted(fn () => ShopData::flush());
     }
 
     /**

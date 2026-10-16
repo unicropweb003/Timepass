@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\ShopData;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Schema;
 
@@ -14,6 +15,13 @@ class Setting extends Model
     protected $keyType = 'string';
 
     protected $fillable = ['key', 'value'];
+
+    /** Clear the cached storefront data whenever a setting changes. */
+    protected static function booted(): void
+    {
+        static::saved(fn () => ShopData::flush());
+        static::deleted(fn () => ShopData::flush());
+    }
 
     /** Get a setting value (JSON-decoded), or $default if missing. */
     public static function get(string $key, mixed $default = null): mixed

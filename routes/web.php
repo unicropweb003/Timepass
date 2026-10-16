@@ -14,24 +14,39 @@ use App\Http\Controllers\Admin\TransactionController;
 use App\Http\Controllers\Admin\WishlistController as AdminWishlistController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\McpUploadController;
+use App\Http\Controllers\MediaController;
 use App\Http\Controllers\ShopController;
 use App\Http\Controllers\WishlistController;
 use App\Http\Middleware\McpTokenAuth;
-use App\Models\Media;
+use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
+use Illuminate\Cookie\Middleware\EncryptCookies;
+use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
+use Illuminate\Session\Middleware\StartSession;
 use Illuminate\Support\Facades\Route;
+use Illuminate\View\Middleware\ShareErrorsFromSession;
 
-// Images stored in the database (AI-generated or uploaded via the MCP tools).
-Route::get('/media/{media}', function (Media $media) {
-    return response(base64_decode($media->data), 200, [
-        'Content-Type' => $media->mime,
-        'Cache-Control' => 'public, max-age=31536000, immutable',
-    ]);
-})->whereNumber('media')->name('media.show');
+// Session/cookie middleware that stateless endpoints skip: no session read/write
+// (a database round trip with the database session driver) and no cookies.
+$stateless = [
+    EncryptCookies::class,
+    AddQueuedCookiesToResponse::class,
+    StartSession::class,
+    ShareErrorsFromSession::class,
+    ValidateCsrfToken::class,
+];
+
+// Images stored in the database (AI-generated or uploaded via the MCP tools),
+// served from a local disk copy after the first request.
+Route::get('/media/{id}', [MediaController::class, 'show'])
+    ->whereNumber('id')
+    ->withoutMiddleware($stateless)
+    ->name('media.show');
 
 // MCP image upload: returns an upload_id (15 min) for image_upload_id.
-// Token via Authorization: Bearer, ?token=, or /upload/<token>. CSRF-exempt (see bootstrap/app.php).
+// Token via Authorization: Bearer, ?token=, or /upload/<token>.
 Route::post('/upload/{token?}', [McpUploadController::class, 'store'])
     ->middleware([McpTokenAuth::class, 'throttle:30,1'])
+    ->withoutMiddleware($stateless)
     ->name('mcp.upload');
 
 // Public shop pages.
