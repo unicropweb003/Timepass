@@ -32,7 +32,7 @@ class ListReviews extends Tool
                 'sort_order' => (int) $r->sort_order,
             ])->all();
 
-        return Response::structured([
+        return Response::json([
             'count' => count($reviews),
             'reviews' => $reviews,
         ]);

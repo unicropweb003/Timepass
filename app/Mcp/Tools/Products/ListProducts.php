@@ -46,7 +46,7 @@ class ListProducts extends Tool
                 'image' => $p->image,
             ])->all();
 
-        return Response::structured([
+        return Response::json([
             'count' => count($products),
             'products' => $products,
         ]);

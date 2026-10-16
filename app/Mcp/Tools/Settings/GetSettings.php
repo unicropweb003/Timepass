@@ -18,7 +18,7 @@ class GetSettings extends Tool
 {
     public function handle(Request $request): Response
     {
-        return Response::structured([
+        return Response::json([
             'contact' => Setting::get('contact', []),
             'social' => Setting::get('social', []),
         ]);

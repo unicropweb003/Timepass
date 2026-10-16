@@ -33,7 +33,7 @@ class ListCategories extends Tool
                 'sort_order' => (int) $c->sort_order,
             ])->all();
 
-        return Response::structured([
+        return Response::json([
             'count' => count($categories),
             'categories' => $categories,
         ]);
