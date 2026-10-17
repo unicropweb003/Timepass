@@ -8,6 +8,8 @@
     $hasDiscount = ! empty($product['mrp']) && $product['mrp'] > $product['price'];
     $off = $hasDiscount ? round(100 - $product['price'] / $product['mrp'] * 100) : 0;
     $url = $product['url'] ?? route('products');
+    // "+" button: the Products page filtered to this product's category.
+    $categoryUrl = route('products', array_filter(['category' => $product['category_slug'] ?? null]));
 @endphp
 <div data-tilt class="group h-full [perspective:1200px]">
     <article data-tilt-card
@@ -54,7 +56,7 @@
                         <span class="text-xs text-gray-400 line-through">₹{{ number_format($product['mrp']) }}</span>
                     @endif
                 </div>
-                <a href="{{ route('contact', ['product' => $product['name']]) }}" aria-label="Enquire about {{ $product['name'] }}"
+                <a href="{{ $categoryUrl }}" aria-label="See more {{ $product['category'] }} products" title="See more {{ $product['category'] }}"
                    class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-white shadow-lg transition-transform duration-300 hover:rotate-90 hover:scale-110" style="background-image: {{ $grad }}">
                     <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="2.4" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
                 </a>
