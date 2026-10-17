@@ -109,6 +109,27 @@
         </div>
 
         <div>
+            <label class="block text-sm font-medium text-gray-700">Product video <span class="text-gray-400">— optional, shown in "Watch &amp; shop" on the home page</span></label>
+            @if ($product->video)
+                <div class="mt-2 flex items-start gap-4">
+                    <video src="{{ \App\Support\VideoUrl::sources($product->video)[0] }}" poster="{{ \App\Support\VideoUrl::poster($product->video) }}"
+                        class="h-40 w-[5.625rem] rounded-lg bg-gray-900 object-cover" muted loop playsinline controls preload="metadata"></video>
+                    <label class="mt-1 flex items-center gap-2 text-sm text-gray-700">
+                        <input type="checkbox" name="remove_video" value="1" @checked(old('remove_video'))
+                            class="rounded border-gray-300 text-red-600 focus:ring-red-500">
+                        Remove this video
+                    </label>
+                </div>
+            @endif
+            <input type="file" name="video" id="video-input" accept=".mp4,.mov,.webm,.m4v,video/mp4,video/quicktime,video/webm"
+                class="mt-2 block w-full text-sm text-gray-600 file:mr-3 file:rounded-lg file:border-0 file:bg-indigo-50 file:px-4 file:py-2 file:text-sm file:font-medium file:text-indigo-700 hover:file:bg-indigo-100">
+            <p id="video-size-error" class="mt-1 hidden text-xs font-medium text-red-600">This video is larger than 40 MB. Please use a shorter clip.</p>
+            <p class="mt-1 text-xs text-gray-400">A short upright clip (5–20 seconds, 9:16, like a phone video) of a model showing the product. MP4, MOV or WebM, up to 40 MB. Plays silently on the home page; shoppers can tap it to watch with sound.</p>
+            <input type="url" name="video_url" value="{{ old('video_url') }}" placeholder="…or paste a direct link to a video file (https://…/clip.mp4)"
+                class="mt-3 block w-full rounded-lg border border-gray-300 px-3.5 py-2.5 text-sm shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40">
+        </div>
+
+        <div>
             <label class="block text-sm font-medium text-gray-700">Tags</label>
             <div class="mt-2 flex flex-wrap gap-4">
                 @foreach (['best-seller' => 'Best seller', 'recommended' => 'Recommended'] as $tag => $label)
@@ -155,5 +176,14 @@
     }
     categorySelect.addEventListener('change', populateTypes);
     populateTypes();
+
+    // Stop an over-size video before it is sent: the server would drop the whole form.
+    const videoInput = document.getElementById('video-input');
+    const videoError = document.getElementById('video-size-error');
+    const tooBig = () => (videoInput.files[0]?.size || 0) > 40 * 1024 * 1024;
+    videoInput.addEventListener('change', () => videoError.classList.toggle('hidden', !tooBig()));
+    videoInput.form.addEventListener('submit', (e) => {
+        if (tooBig()) { e.preventDefault(); videoError.classList.remove('hidden'); videoInput.focus(); }
+    });
 </script>
 @endsection

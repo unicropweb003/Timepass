@@ -17,6 +17,8 @@ RUN apt-get update && apt-get install -y git unzip libpq-dev libzip-dev \
 # not re-compiled on every request (the code never changes inside the image,
 # so timestamp checks are off). The built-in server ("cli-server" SAPI) uses
 # opcache.enable; artisan commands (CLI) are unaffected.
+# Upload limits: PHP's defaults (2 MB per file, 8 MB per form) are below the
+# admin's 5 MB images and 40 MB product videos (see CloudinaryUploader).
 RUN { \
         echo 'opcache.enable=1'; \
         echo 'opcache.memory_consumption=128'; \
@@ -26,6 +28,8 @@ RUN { \
         echo 'realpath_cache_size=4096K'; \
         echo 'realpath_cache_ttl=600'; \
         echo 'expose_php=Off'; \
+        echo 'upload_max_filesize=48M'; \
+        echo 'post_max_size=56M'; \
     } > /usr/local/etc/php/conf.d/zz-production.ini
 
 # Serve requests in parallel: 4 worker processes instead of one at a time

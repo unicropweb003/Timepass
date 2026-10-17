@@ -83,17 +83,27 @@ class ShopController extends Controller
         ];
 
         // Home page carousels: products from the catalogue (config/products.php) by tag.
+        $catalog = $this->catalog();
         $bestSellers = [
             'title' => 'Best Sellers',
             'link' => route('products'),
-            'products' => $this->catalog()->filter(fn ($p) => in_array('best-seller', $p['tags'], true))->values()->all(),
+            'products' => $catalog->filter(fn ($p) => in_array('best-seller', $p['tags'], true))->values()->all(),
         ];
 
         $recommended = [
             'title' => 'Recommended for You',
             'link' => route('products'),
-            'products' => $this->catalog()->filter(fn ($p) => in_array('recommended', $p['tags'], true))->values()->all(),
+            'products' => $catalog->filter(fn ($p) => in_array('recommended', $p['tags'], true))->values()->all(),
         ];
+
+        // "Watch & shop" reels above the offer: products with a video (set in the admin
+        // panel) first, then best sellers as moving photo reels until there are 6.
+        [$withVideo, $withoutVideo] = $catalog->partition(fn ($p) => filled($p['video'] ?? null));
+        $reels = $withVideo->take(12)
+            ->concat($withoutVideo
+                ->sortByDesc(fn ($p) => in_array('best-seller', $p['tags'] ?? [], true))
+                ->take(max(0, 6 - $withVideo->count())))
+            ->values()->all();
 
         // Banners: photo on one side, text on a coloured panel that fades into it.
         // 'panel' is the panel colour, 'dark' = light text on a dark panel. Images in public/images/banners/.
@@ -171,7 +181,7 @@ class ShopController extends Controller
             $reviews = $dbReviews;
         }
 
-        return view('home', compact('offer', 'promos', 'bestSellers', 'recommended', 'reviews', 'wideBanners', 'dualBanners'));
+        return view('home', compact('offer', 'promos', 'bestSellers', 'recommended', 'reels', 'reviews', 'wideBanners', 'dualBanners'));
     }
 
     public function products(Request $request)

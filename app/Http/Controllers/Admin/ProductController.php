@@ -8,6 +8,7 @@ use App\Models\Category;
 use App\Models\Product;
 use App\Services\CloudinaryUploader;
 use App\Support\PerPage;
+use App\Support\VideoUrl;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
@@ -46,9 +47,12 @@ class ProductController extends Controller
         $data['image'] = $this->handleImage($request, null);
 
         try {
+            $data['video'] = $this->handleVideo($request, null);
             Product::create($data);
         } catch (\Throwable $e) {
-            $this->deleteImage($data['image']); // don't leave an orphan upload behind
+            // Don't leave orphan uploads behind.
+            $this->deleteImage($data['image']);
+            $this->uploader->delete($data['video'] ?? null);
             throw $e;
         }
 
@@ -71,13 +75,26 @@ class ProductController extends Controller
             $data['slug'] = $this->uniqueSlug($data['name'], $product->id);
         }
         $old = $product->image;
+        $oldVideo = $product->video;
         $data['image'] = $this->handleImage($request, $product);
+
+        try {
+            $data['video'] = $this->handleVideo($request, $product);
+        } catch (\Throwable $e) {
+            if ($data['image'] !== $old) {
+                $this->deleteImage($data['image']); // the new image would be orphaned
+            }
+            throw $e;
+        }
 
         $product->update($data);
 
-        // Remove the replaced image only once the new one is saved on the record.
+        // Remove the replaced files only once the new ones are saved on the record.
         if ($data['image'] !== $old) {
             $this->deleteImage($old);
+        }
+        if ($data['video'] !== $oldVideo) {
+            $this->uploader->delete($oldVideo); // ignores links that are not Cloudinary uploads
         }
 
         return redirect()->route('admin.products.index')->with('status', 'Product updated.');
@@ -86,8 +103,10 @@ class ProductController extends Controller
     public function destroy(Product $product)
     {
         $image = $product->image;
+        $video = $product->video;
         $product->delete();
         $this->deleteImage($image);
+        $this->uploader->delete($video);
 
         return back()->with('status', 'Product deleted.');
     }
@@ -106,16 +125,22 @@ class ProductController extends Controller
             'rating' => ['nullable', 'numeric', 'min:0', 'max:5'],
             'reviews' => ['nullable', 'integer', 'min:0'],
             'image' => ['nullable', ...CloudinaryUploader::RULES],
+            'video' => ['nullable', ...CloudinaryUploader::VIDEO_RULES],
+            'video_url' => ['nullable', 'string', 'max:2000', 'regex:'.VideoUrl::LINK_PATTERN],
+            'remove_video' => ['nullable', 'boolean'],
             'tags' => ['nullable', 'array'],
             'tags.*' => ['string'],
             'is_active' => ['nullable', 'boolean'],
-        ], collect(CloudinaryUploader::MESSAGES)->mapWithKeys(fn ($msg, $rule) => ["image.$rule" => $msg])->all());
+        ], collect(CloudinaryUploader::MESSAGES)->mapWithKeys(fn ($msg, $rule) => ["image.$rule" => $msg])
+            ->merge(collect(CloudinaryUploader::VIDEO_MESSAGES)->mapWithKeys(fn ($msg, $rule) => ["video.$rule" => $msg]))
+            ->put('video_url.regex', VideoUrl::LINK_MESSAGE)
+            ->all());
 
         $validated['rating'] = $validated['rating'] ?? 0;
         $validated['reviews'] = $validated['reviews'] ?? 0;
         $validated['tags'] = array_values($validated['tags'] ?? []);
         $validated['is_active'] = $request->boolean('is_active');
-        unset($validated['image']); // handled separately
+        unset($validated['image'], $validated['video'], $validated['video_url'], $validated['remove_video']); // handled separately
 
         return $validated;
     }
@@ -136,6 +161,29 @@ class ProductController extends Controller
         }
 
         return $product?->image;
+    }
+
+    /**
+     * The product's video: a new upload (to Cloudinary, like images), else a
+     * pasted direct link, else removed when asked, else the current one.
+     */
+    private function handleVideo(Request $request, ?Product $product): ?string
+    {
+        if ($request->hasFile('video')) {
+            try {
+                return $this->uploader->uploadVideo($request->file('video'), 'products/videos');
+            } catch (\Throwable $e) {
+                Log::error('Product video upload failed', ['error' => CloudinaryUploader::safeMessage($e)]);
+
+                throw ValidationException::withMessages(['video' => 'Could not upload the video. Please try again.']);
+            }
+        }
+
+        if ($request->filled('video_url')) {
+            return trim((string) $request->input('video_url'));
+        }
+
+        return $request->boolean('remove_video') ? null : $product?->video;
     }
 
     /** Delete a stored image of any generation: Cloudinary URL, media row, or old local file. */

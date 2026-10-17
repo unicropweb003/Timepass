@@ -149,6 +149,9 @@
     </div>
 </section>
 
+{{-- ============================ WATCH & SHOP (product videos) ============================ --}}
+@include('partials.reels', ['reels' => $reels ?? [], 'accent' => $accent])
+
 {{-- ============================ OFFER ============================ --}}
 <section id="offer" data-reveal class="mt-16 scroll-mt-28">
     <div class="grid overflow-hidden rounded-3xl bg-white shadow-xl shadow-indigo-500/5 ring-1 ring-gray-200 lg:grid-cols-5">

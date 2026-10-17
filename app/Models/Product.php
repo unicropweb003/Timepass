@@ -11,7 +11,7 @@ class Product extends Model
 {
     protected $fillable = [
         'name', 'slug', 'category', 'type', 'form', 'price', 'mrp', 'stock',
-        'description', 'details', 'rating', 'reviews', 'image', 'tags',
+        'description', 'details', 'rating', 'reviews', 'image', 'video', 'tags',
         'is_active', 'sort_order',
     ];
 
@@ -58,6 +58,7 @@ class Product extends Model
             'rating' => (float) $this->rating,
             'reviews' => (int) $this->reviews,
             'image' => $this->image,
+            'video' => $this->video,
             'tags' => $this->tags ?: [],
         ];
     }

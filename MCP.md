@@ -68,6 +68,7 @@ tests/Feature/Mcp/StoreServerTest.php
 - Every `delete_*` needs **`confirm: true`** and also deletes the stored image. `delete_category` refuses while it still has products, unless you pass `move_products_to`.
 - `list_*` tools support `search`, filters and `page` / `per_page`.
 - Every tool replies with a short summary plus the saved record as JSON.
+- `create_product` / `update_product` take an optional **`video_url`**: a direct https link to an MP4, WebM or MOV file (not a YouTube or Instagram page). It plays in "Watch & shop" on the home page. On update, `null` or `""` removes it; replacing or removing a video that was uploaded in the admin panel deletes it from Cloudinary. Video files themselves are uploaded in the admin panel (Products → Edit → Product video).
 
 ## Image handling
 

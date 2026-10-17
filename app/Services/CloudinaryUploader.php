@@ -25,6 +25,18 @@ class CloudinaryUploader
         'image' => 'The :attribute must be an image.',
     ];
 
+    /**
+     * Validation rules for an uploaded product video: mp4, mov, webm or m4v, up to 40 MB
+     * (Cloudinary's free plan resizes videos on the fly only up to that size).
+     */
+    public const VIDEO_RULES = ['file', 'mimes:mp4,mov,webm,m4v', 'max:40960'];
+
+    public const VIDEO_MESSAGES = [
+        'mimes' => 'The :attribute must be an MP4, MOV or WebM video.',
+        'max' => 'The :attribute may not be larger than 40 MB. Use a shorter clip (5–20 seconds).',
+        'file' => 'The :attribute failed to upload.',
+    ];
+
     public function __construct(private ?Cloudinary $client = null) {}
 
     /**
@@ -37,6 +49,19 @@ class CloudinaryUploader
     public function upload(UploadedFile $file, string $folder): string
     {
         return $this->send($file->getRealPath(), $folder);
+    }
+
+    /**
+     * Upload a video into "<CLOUDINARY_FOLDER>/<folder>". The SDK streams the
+     * file and sends it in chunks when it is large, so it is never held in memory.
+     *
+     * @return string the https secure_url to store in the database
+     *
+     * @throws RuntimeException when Cloudinary is not configured or the upload fails
+     */
+    public function uploadVideo(UploadedFile $file, string $folder): string
+    {
+        return $this->send($file->getRealPath(), $folder, 'video');
     }
 
     /**
@@ -58,15 +83,18 @@ class CloudinaryUploader
         return $this->client !== null || filled(config('filesystems.disks.cloudinary.url'));
     }
 
-    /** @param  string  $file  a local file path or a data URI */
-    private function send(string $file, string $folder): string
+    /**
+     * @param  string  $file  a local file path or a data URI
+     * @param  string  $type  Cloudinary resource type: image or video
+     */
+    private function send(string $file, string $folder, string $type = 'image'): string
     {
         $prefix = trim((string) config('filesystems.disks.cloudinary.folder'), '/');
         $folder = trim($prefix.'/'.trim($folder, '/'), '/');
 
         $result = $this->client()->uploadApi()->upload($file, [
             'folder' => $folder,
-            'resource_type' => 'image',
+            'resource_type' => $type,
             'use_filename' => true,
             'unique_filename' => true,
             'overwrite' => false,

@@ -20,7 +20,7 @@ use Illuminate\Support\Facades\Cache;
  */
 class ShopData
 {
-    private const KEY = 'shop-data:v1';
+    private const KEY = 'shop-data:v2'; // bump when the cached record shape changes
 
     private const TTL = 300; // seconds
 

@@ -4,6 +4,7 @@ namespace App\Mcp\Tools\Products;
 
 use App\Mcp\Support\Finder;
 use App\Mcp\Support\ImagePipeline;
+use App\Services\CloudinaryUploader;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Laravel\Mcp\Request;
 use Laravel\Mcp\Response;
@@ -35,6 +36,7 @@ class DeleteProduct extends Tool
 
         $label = "#{$product->id} \"{$product->name}\"";
         ImagePipeline::deleteStored($product->image);
+        app(CloudinaryUploader::class)->delete($product->video); // only removes Cloudinary uploads
         $product->delete();
 
         return Response::text("Deleted product {$label} and its stored image.");

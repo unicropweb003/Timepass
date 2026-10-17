@@ -48,6 +48,7 @@ class Present
             'tags' => $p->tags ?: [],
             'status' => $p->is_active ? 'active' : 'inactive',
             'image_url' => static::imageUrl($p->image),
+            'video_url' => $p->video,
             'page_url' => route('product.show', ['product' => $p->slug]),
             'created_at' => $p->created_at?->toIso8601String(),
             'updated_at' => $p->updated_at?->toIso8601String(),

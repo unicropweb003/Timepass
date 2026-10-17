@@ -8,6 +8,8 @@ use App\Mcp\Support\ImageInput;
 use App\Mcp\Support\ImagePipeline;
 use App\Mcp\Support\Present;
 use App\Models\Product;
+use App\Services\CloudinaryUploader;
+use App\Support\VideoUrl;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Laravel\Mcp\Request;
 use Laravel\Mcp\Response;
@@ -38,7 +40,8 @@ class UpdateProduct extends Tool
             'tags.*' => 'string|max:50',
             'status' => 'sometimes|in:active,inactive',
             'sort_order' => 'sometimes|integer|min:0',
-        ] + ImageInput::rules());
+            'video_url' => ['nullable', 'string', 'max:2000', 'regex:'.VideoUrl::LINK_PATTERN],
+        ] + ImageInput::rules(), ['video_url.regex' => VideoUrl::LINK_MESSAGE]);
 
         $product = Finder::product($data['product']);
         if (! $product) {
@@ -56,6 +59,12 @@ class UpdateProduct extends Tool
 
         if (array_key_exists('slug', $data)) {
             $changes['slug'] = Finder::uniqueSlug(Product::class, $data['slug'], $product->id);
+        }
+
+        // Video: a direct link replaces the current one; null or "" removes it.
+        $oldVideo = $product->video;
+        if (array_key_exists('video_url', $data)) {
+            $changes['video'] = filled($data['video_url']) ? trim($data['video_url']) : null;
         }
 
         if (array_key_exists('status', $data)) {
@@ -88,6 +97,9 @@ class UpdateProduct extends Tool
         }
 
         $product->fill($changes)->save();
+        if ($product->video !== $oldVideo) {
+            app(CloudinaryUploader::class)->delete($oldVideo); // only removes Cloudinary uploads
+        }
 
         $image = ImagePipeline::resolve($data, 'keep', trim(($changes['name'] ?? $product->name).'. '.($product->description ?? '')));
         if (in_array($image['action'], ['set', 'remove'], true)) {
@@ -124,6 +136,7 @@ class UpdateProduct extends Tool
             'tags' => $schema->array()->items($schema->string())->description('Replaces all tags.'),
             'status' => $schema->string()->enum(['active', 'inactive'])->description('Show or hide on the site.'),
             'sort_order' => $schema->integer()->description('Lower numbers appear first.'),
+            'video_url' => $schema->string()->description('Short product video shown in "Watch & shop" on the home page: a direct https link to an MP4, WebM or MOV file (not a YouTube or Instagram page). Pass null or "" to remove the video.'),
         ] + ImageInput::schema($schema, false);
     }
 }

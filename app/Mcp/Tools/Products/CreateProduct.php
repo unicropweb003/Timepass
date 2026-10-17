@@ -8,6 +8,7 @@ use App\Mcp\Support\ImageInput;
 use App\Mcp\Support\ImagePipeline;
 use App\Mcp\Support\Present;
 use App\Models\Product;
+use App\Support\VideoUrl;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Laravel\Mcp\Request;
 use Laravel\Mcp\Response;
@@ -37,8 +38,10 @@ class CreateProduct extends Tool
             'tags.*' => 'string|max:50',
             'status' => 'nullable|in:active,inactive',
             'sort_order' => 'nullable|integer|min:0',
+            'video_url' => ['nullable', 'string', 'max:2000', 'regex:'.VideoUrl::LINK_PATTERN],
         ] + ImageInput::rules(), [
             'sale_price.lt' => 'sale_price must be lower than price (price is the regular price, sale_price the discounted one).',
+            'video_url.regex' => VideoUrl::LINK_MESSAGE,
         ]);
 
         [$category, $created, $error] = CategoryInput::resolve($data, true);
@@ -64,6 +67,7 @@ class CreateProduct extends Tool
             'tags' => $data['tags'] ?? [],
             'is_active' => ($data['status'] ?? 'active') === 'active',
             'sort_order' => $data['sort_order'] ?? 0,
+            'video' => filled($data['video_url'] ?? null) ? trim($data['video_url']) : null,
         ]);
 
         $image = ImagePipeline::resolve($data, 'ai', trim($product->name.'. '.($product->description ?? '')));
@@ -97,6 +101,7 @@ class CreateProduct extends Tool
             'tags' => $schema->array()->items($schema->string())->description('Tags. "best-seller" and "recommended" also feature the product on the home page.'),
             'status' => $schema->string()->enum(['active', 'inactive'])->description('active = visible on the site (default), inactive = hidden.'),
             'sort_order' => $schema->integer()->description('Lower numbers appear first.'),
+            'video_url' => $schema->string()->description('Short product video shown in "Watch & shop" on the home page: a direct https link to an MP4, WebM or MOV file (not a YouTube or Instagram page).'),
         ] + ImageInput::schema($schema, true);
     }
 }
