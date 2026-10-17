@@ -18,9 +18,10 @@ return [
     |
     */
 
-    // "file" keeps sessions on the app server's own disk: no database round
-    // trip on every page view (the database is in another region).
-    'driver' => env('SESSION_DRIVER', 'file'),
+    // "database" (the sessions table) is shared by every instance, so a logged-in
+    // visitor stays logged in whichever server the load balancer picks. "file"
+    // is faster but only works with a single instance.
+    'driver' => env('SESSION_DRIVER', 'database'),
 
     /*
     |--------------------------------------------------------------------------

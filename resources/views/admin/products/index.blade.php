@@ -37,7 +37,7 @@
                         <td class="px-6 py-3">
                             <div class="flex items-center gap-3">
                                 @if ($product->image)
-                                    <img src="{{ asset($product->image) }}" alt="" class="h-10 w-10 rounded-lg object-cover">
+                                    <img src="{{ $product->image_url }}" alt="" class="h-10 w-10 rounded-lg object-cover">
                                 @else
                                     <span class="flex h-10 w-10 items-center justify-center rounded-lg bg-gray-100 text-gray-400">
                                         <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909M18 9.75h.008v.008H18V9.75Z"/></svg>

@@ -1,0 +1,20 @@
+# Cloudflare Worker load balancer for TimePass (free plan). See LOAD-BALANCING.md.
+# Deploy:  npx wrangler deploy   (run inside deploy/cloudflare-lb)
+name = "timepass-lb"
+main = "worker.js"
+compatibility_date = "2024-09-23"
+
+[vars]
+# Comma-separated list of the site copies to balance between. Each one runs the
+# same Docker image with the same DB, APP_KEY and session store.
+ORIGINS = "https://timepass-al0s.onrender.com"
+# How long a failing origin is skipped, and how long to wait for an answer.
+UNHEALTHY_SECONDS = "30"
+TIMEOUT_MS = "15000"
+
+# Ping every origin's /up every 5 minutes (health check + keep-alive).
+[triggers]
+crons = ["*/5 * * * *"]
+
+# Optional: serve the store on your own domain (needed for edge caching).
+# routes = [{ pattern = "shop.example.com", custom_domain = true }]

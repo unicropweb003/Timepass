@@ -10,7 +10,8 @@ RUN apt-get update && apt-get install -y git unzip libpq-dev libzip-dev \
         libjpeg62-turbo-dev libpng-dev libwebp-dev \
     && docker-php-ext-configure gd --with-jpeg --with-webp \
     && docker-php-ext-install pdo_pgsql zip gd opcache \
-    && rm -rf /var/lib/apt/lists/*
+    && pecl install redis && docker-php-ext-enable redis \
+    && rm -rf /var/lib/apt/lists/* /tmp/pear
 
 # Production PHP settings. OPcache keeps compiled code in memory so Laravel is
 # not re-compiled on every request (the code never changes inside the image,
@@ -31,9 +32,17 @@ RUN { \
 # (requires `serve --no-reload`).
 ENV PHP_CLI_SERVER_WORKERS=4
 
+# Logs go to the container's output (shown in Render → Logs), not to a file on
+# the ephemeral disk. An explicit LOG_CHANNEL in Render's Environment overrides it.
+ENV LOG_CHANNEL=stderr
+
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 WORKDIR /var/www
 COPY . .
 COPY --from=assets /app/public/build public/build
 RUN composer install --no-dev --optimize-autoloader
-CMD sh -c "php artisan migrate --force && (php artisan db:seed --force || echo 'db:seed failed - starting anyway') && php artisan config:cache && php artisan route:cache && php artisan view:cache && php artisan serve --no-reload --host=0.0.0.0 --port=${PORT:-10000}"
+# RUN_MIGRATIONS=false on extra instances behind a load balancer, so only one
+# instance migrates/seeds the shared database on start (see LOAD-BALANCING.md).
+# --isolated: with a shared cache (Redis/database) instances starting together
+# take a lock, so only one runs the migrations.
+CMD sh -c "if [ \"${RUN_MIGRATIONS:-true}\" = true ]; then php artisan migrate --force --isolated &&(php artisan db:seed --force || echo 'db:seed failed - starting anyway'); fi && php artisan config:cache && php artisan route:cache && php artisan view:cache && php artisan serve --no-reload --host=0.0.0.0 --port=${PORT:-10000}"

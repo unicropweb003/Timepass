@@ -54,6 +54,10 @@ return [
 
     'url' => env('APP_URL', 'http://localhost'),
 
+    // Behind a load balancer: build every link from APP_URL (the public address)
+    // instead of the host the request arrived on (an origin's own URL).
+    'force_url' => (bool) env('APP_FORCE_URL', false),
+
     /*
     |--------------------------------------------------------------------------
     | Application Timezone

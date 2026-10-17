@@ -101,11 +101,11 @@
         <div>
             <label class="block text-sm font-medium text-gray-700">Product image</label>
             @if ($product->image)
-                <img src="{{ asset($product->image) }}" alt="" class="mt-2 h-20 w-20 rounded-lg object-cover">
+                <img src="{{ $product->image_url }}" alt="" class="mt-2 h-20 w-20 rounded-lg object-cover">
             @endif
-            <input type="file" name="image" accept="image/*"
+            <input type="file" name="image" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
                 class="mt-2 block w-full text-sm text-gray-600 file:mr-3 file:rounded-lg file:border-0 file:bg-indigo-50 file:px-4 file:py-2 file:text-sm file:font-medium file:text-indigo-700 hover:file:bg-indigo-100">
-            <p class="mt-1 text-xs text-gray-400">JPG/PNG, up to 4 MB. Leave empty to keep the current image.</p>
+            <p class="mt-1 text-xs text-gray-400">JPG, JPEG, PNG or WebP, up to 5 MB. Leave empty to keep the current image.</p>
         </div>
 
         <div>

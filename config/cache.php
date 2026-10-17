@@ -15,7 +15,9 @@ return [
     |
     */
 
-    'default' => env('CACHE_STORE', 'file'),
+    // Shared by every instance (cache table). The storefront catalogue still uses a
+    // fast per-instance file copy, see App\Support\ShopData.
+    'default' => env('CACHE_STORE', 'database'),
 
     /*
     |--------------------------------------------------------------------------

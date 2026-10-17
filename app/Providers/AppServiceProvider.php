@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Services\CloudinaryUploader;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 
@@ -12,7 +13,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        // Built explicitly so the Cloudinary client is only created when an upload
+        // or delete actually happens (and never fails just because a page needs it).
+        $this->app->singleton(CloudinaryUploader::class, fn () => new CloudinaryUploader);
     }
 
     /**
@@ -22,6 +25,10 @@ class AppServiceProvider extends ServiceProvider
     {
         if (config('app.env') === 'production') {
             URL::forceScheme('https');
+        }
+
+        if (config('app.force_url')) {
+            URL::forceRootUrl(config('app.url'));
         }
     }
 }

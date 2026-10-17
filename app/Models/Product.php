@@ -2,7 +2,9 @@
 
 namespace App\Models;
 
+use App\Support\ImageUrl;
 use App\Support\ShopData;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 
 class Product extends Model
@@ -28,6 +30,12 @@ class Product extends Model
     {
         static::saved(fn () => ShopData::flush());
         static::deleted(fn () => ShopData::flush());
+    }
+
+    /** Full image URL ($product->image_url): Cloudinary URLs as is, old local paths via asset(). */
+    protected function imageUrl(): Attribute
+    {
+        return Attribute::get(fn () => ImageUrl::resolve($this->image));
     }
 
     /**

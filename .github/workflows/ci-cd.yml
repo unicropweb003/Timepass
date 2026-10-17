@@ -151,6 +151,7 @@ jobs:
               "gd+webp"    => function_exists("imagewebp"),
               "pdo_pgsql"  => extension_loaded("pdo_pgsql"),
               "pdo_sqlite" => extension_loaded("pdo_sqlite"),
+              "redis"      => extension_loaded("redis"),
             ];
             foreach ($checks as $name => $ok) { echo str_pad($name, 12), $ok ? "ok" : "MISSING", PHP_EOL; }
             exit(in_array(false, $checks, true) ? 1 : 0);'

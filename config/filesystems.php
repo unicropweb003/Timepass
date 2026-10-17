@@ -30,6 +30,15 @@ return [
 
     'disks' => [
 
+        // Cloudinary (uploaded images). Read by App\Services\CloudinaryUploader and
+        // by the cloudinary-labs package's \Cloudinary\Cloudinary binding.
+        // CLOUDINARY_URL = cloudinary://<key>:<secret>@<cloud>, set in .env / Render only.
+        'cloudinary' => [
+            'driver' => 'cloudinary',
+            'url' => env('CLOUDINARY_URL'),
+            'folder' => env('CLOUDINARY_FOLDER', 'timepass'),
+        ],
+
         'local' => [
             'driver' => 'local',
             'root' => storage_path('app/private'),
