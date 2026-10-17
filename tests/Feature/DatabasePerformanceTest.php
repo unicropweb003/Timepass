@@ -201,6 +201,26 @@ class DatabasePerformanceTest extends TestCase
         $this->assertTrue(Schema::hasIndex('orders', ['user_id', 'created_at']));
     }
 
+    public function test_index_migration_does_not_run_as_one_big_transaction(): void
+    {
+        // On Neon's pooler a single failed statement aborts the whole transaction;
+        // committing each index on its own lets a re-run continue where it stopped.
+        $migration = require database_path('migrations/2026_10_17_000002_add_performance_indexes.php');
+
+        $this->assertFalse($migration->withinTransaction);
+    }
+
+    public function test_postgres_connection_avoids_named_prepared_statements(): void
+    {
+        if (! defined('PDO::PGSQL_ATTR_DISABLE_PREPARES')) {
+            $this->markTestSkipped('pdo_pgsql is not installed.');
+        }
+
+        // Needed for Neon's pooled connection (PgBouncer): see config/database.php.
+        $options = config('database.connections.pgsql.options');
+        $this->assertTrue($options[\PDO::PGSQL_ATTR_DISABLE_PREPARES] ?? false);
+    }
+
     // ── N+1 ──────────────────────────────────────────────────────────
 
     public function test_lazy_loading_throws_outside_production(): void

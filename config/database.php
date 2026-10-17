@@ -97,6 +97,14 @@ return [
             'prefix_indexes' => true,
             'search_path' => 'public',
             'sslmode' => env('DB_SSLMODE', 'prefer'),
+            // Neon's pooled connection (PgBouncer, transaction mode) shares server
+            // connections, so PHP's named prepared statements ("pdo_stmt_…") clash with
+            // leftovers from other requests. Outside a transaction PHP recovers; inside
+            // one (every migration) Postgres aborts it: "current transaction is aborted".
+            // This sends each query and its values in one call, without a named statement.
+            'options' => defined('PDO::PGSQL_ATTR_DISABLE_PREPARES') && filter_var(env('DB_DISABLE_PREPARES', true), FILTER_VALIDATE_BOOL)
+                ? [PDO::PGSQL_ATTR_DISABLE_PREPARES => true]
+                : [],
         ],
 
         'sqlsrv' => [

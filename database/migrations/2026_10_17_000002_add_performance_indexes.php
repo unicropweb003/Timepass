@@ -12,6 +12,11 @@ use Illuminate\Support\Facades\Schema;
 // same columns already exists. down() drops only the indexes this migration made.
 return new class extends Migration
 {
+    // Not one big transaction: each index is created (and committed) on its own, so
+    // a failure part-way leaves the finished ones in place and the next run simply
+    // continues. Plain index creation needs no transaction to stay consistent.
+    public $withinTransaction = false;
+
     /** table => list of column sets, one index each */
     private const INDEXES = [
         'orders' => [['user_id', 'created_at'], ['status'], ['created_at']],
@@ -31,9 +36,12 @@ return new class extends Migration
                 continue;
             }
 
+            // Read the table's existing indexes once, not once per index.
+            $existing = Schema::getIndexes($table);
+
             foreach ($indexes as $columns) {
                 $name = $this->indexName($table, $columns);
-                if (Schema::hasIndex($table, $name) || Schema::hasIndex($table, $columns)) {
+                if ($this->exists($existing, $name, $columns)) {
                     continue;
                 }
 
@@ -49,13 +57,27 @@ return new class extends Migration
                 continue;
             }
 
+            $existing = Schema::getIndexes($table);
+
             foreach ($indexes as $columns) {
                 $name = $this->indexName($table, $columns);
-                if (Schema::hasIndex($table, $name)) {
+                if (in_array($name, array_column($existing, 'name'), true)) {
                     Schema::table($table, fn (Blueprint $t) => $t->dropIndex($name));
                 }
             }
         }
+    }
+
+    /** True if an index with this name, or on exactly these columns, already exists. */
+    private function exists(array $existing, string $name, array $columns): bool
+    {
+        foreach ($existing as $index) {
+            if ($index['name'] === $name || $index['columns'] === $columns) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private function indexName(string $table, array $columns): string
