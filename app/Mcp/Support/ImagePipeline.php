@@ -3,20 +3,27 @@
 namespace App\Mcp\Support;
 
 use App\Models\Media;
+use App\Services\CloudinaryUploader;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Turns an image request (AI prompt, URL, upload id, base64, local path)
- * into a stored, optimised image and returns its path ("media/12").
+ * into a stored, optimised image and returns its path.
  *
  * All images are validated by magic bytes (jpeg/png/webp only), resized to
- * at most 1200px wide and converted to WebP when GD supports it, then saved
- * in the database so they survive redeploys.
+ * at most 1200px wide and converted to WebP when GD supports it, then saved on
+ * Cloudinary (path = its https secure_url). When Cloudinary is not configured or
+ * the upload fails, the image goes to the media table instead (path "media/12",
+ * served by /media/{id}) — older images live there too and keep working.
  *
  * Never throws: failures come back as ['path' => null, 'note' => why].
  */
 class ImagePipeline
 {
     public const MAX_WIDTH = 1200;
+
+    /** Cloudinary folder (under CLOUDINARY_FOLDER) per kind of image. */
+    private const FOLDERS = ['product' => 'products', 'category' => 'categories', 'about' => 'about'];
 
     /**
      * @param  array  $input  validated tool input (image_* keys)
@@ -55,52 +62,132 @@ class ImagePipeline
             default => [null, "Unknown image_source \"{$source}\". Use ai, url, upload or none.", ''],
         };
 
-        // An upload id refers to an already-processed Media row.
+        // An upload id refers to an image staged in the media table by POST /upload.
         if ($bytes instanceof Media) {
-            return ['action' => 'set', 'path' => $bytes->path(), 'note' => "Image attached from upload ({$how})."];
+            $saved = static::promote($bytes, $kind);
+
+            return ['action' => 'set', 'path' => $saved['path'], 'note' => "Image attached from upload ({$how}{$saved['note']})."];
         }
 
         if ($error) {
             return ['action' => 'failed', 'path' => null, 'note' => "Image NOT saved: {$error}"];
         }
 
-        [$media, $error] = static::store($bytes);
+        [$saved, $error] = static::persist($bytes, $kind);
         if ($error) {
             return ['action' => 'failed', 'path' => null, 'note' => "Image NOT saved: {$error}"];
         }
 
-        return ['action' => 'set', 'path' => $media->path(), 'note' => "Image saved ({$how}, {$media->mime}, ".round($media->size / 1024).' KB).'];
+        return ['action' => 'set', 'path' => $saved['path'], 'note' => "Image saved ({$how}, {$saved['mime']}, ".round($saved['size'] / 1024)." KB{$saved['note']})."];
     }
 
-    /** Validate + optimise + persist raw bytes. @return array{0: ?Media, 1: ?string} */
+    /**
+     * Validate + optimise an image for a record and save it: on Cloudinary when
+     * configured, otherwise (or if that upload fails) in the media table.
+     *
+     * @return array{0: ?array{path: string, mime: string, size: int, note: string}, 1: ?string}
+     */
+    public static function persist(string $bytes, string $kind = 'product'): array
+    {
+        [$bytes, $type, $error] = static::prepare($bytes);
+        if ($error) {
+            return [null, $error];
+        }
+
+        $uploader = app(CloudinaryUploader::class);
+        $note = ', stored in the database';
+
+        if ($uploader->isConfigured()) {
+            try {
+                $url = $uploader->uploadBytes($bytes, $type, self::FOLDERS[$kind] ?? 'products');
+
+                return [['path' => $url, 'mime' => $type, 'size' => strlen($bytes), 'note' => ', stored on Cloudinary'], null];
+            } catch (\Throwable $e) {
+                Log::warning('Cloudinary upload failed; image saved in the database instead', ['error' => CloudinaryUploader::safeMessage($e)]);
+                $note = ', stored in the database because the Cloudinary upload failed';
+            }
+        }
+
+        $media = static::createMedia($bytes, $type, false);
+
+        return [['path' => $media->path(), 'mime' => $type, 'size' => strlen($bytes), 'note' => $note], null];
+    }
+
+    /**
+     * Validate + optimise raw bytes into a media row. Used by POST /upload to stage
+     * an image for 15 minutes ($asUpload), until a tool attaches it.
+     *
+     * @return array{0: ?Media, 1: ?string}
+     */
     public static function store(string $bytes, bool $asUpload = false): array
     {
+        [$bytes, $type, $error] = static::prepare($bytes);
+        if ($error) {
+            return [null, $error];
+        }
+
+        return [static::createMedia($bytes, $type, $asUpload), null];
+    }
+
+    /** Delete the stored file behind a record's old image path: a media row or a Cloudinary file (no-op for other links/paths). */
+    public static function deleteStored(?string $path): void
+    {
+        Media::fromPath($path)?->delete();
+        app(CloudinaryUploader::class)->delete($path); // ignores anything that is not a Cloudinary URL; never throws
+    }
+
+    /**
+     * Move an image staged by POST /upload to its final place: Cloudinary when
+     * configured (the staging row is then deleted), otherwise it stays a media row.
+     *
+     * @return array{path: string, note: string}
+     */
+    private static function promote(Media $media, string $kind): array
+    {
+        $uploader = app(CloudinaryUploader::class);
+        if (! $uploader->isConfigured()) {
+            return ['path' => $media->path(), 'note' => ''];
+        }
+
+        try {
+            $url = $uploader->uploadBytes((string) base64_decode($media->data), $media->mime, self::FOLDERS[$kind] ?? 'products');
+        } catch (\Throwable $e) {
+            Log::warning('Cloudinary upload failed; image kept in the database instead', ['error' => CloudinaryUploader::safeMessage($e)]);
+
+            return ['path' => $media->path(), 'note' => ', stored in the database because the Cloudinary upload failed'];
+        }
+
+        $media->delete();
+
+        return ['path' => $url, 'note' => ', stored on Cloudinary'];
+    }
+
+    /** Size limit, magic-byte type check, then resize + WebP. @return array{0: ?string, 1: ?string, 2: ?string} bytes, mime, error */
+    private static function prepare(string $bytes): array
+    {
         if (strlen($bytes) > SafeDownloader::MAX_BYTES) {
-            return [null, 'the image is larger than 5 MB'];
+            return [null, null, 'the image is larger than 5 MB'];
         }
 
         $type = static::detectType($bytes);
         if ($type === null) {
-            return [null, 'the file is not a JPEG, PNG or WebP image'];
+            return [null, null, 'the file is not a JPEG, PNG or WebP image'];
         }
 
         [$bytes, $type] = static::optimise($bytes, $type);
 
-        $media = Media::create([
+        return [$bytes, $type, null];
+    }
+
+    private static function createMedia(string $bytes, string $type, bool $asUpload): Media
+    {
+        return Media::create([
             'mime' => $type,
             'size' => strlen($bytes),
             'data' => base64_encode($bytes),
             'upload_token' => $asUpload ? bin2hex(random_bytes(16)) : null,
             'expires_at' => $asUpload ? now()->addMinutes(15) : null,
         ]);
-
-        return [$media, null];
-    }
-
-    /** Delete the stored file behind a record's old image path (no-op for links/paths). */
-    public static function deleteStored(?string $path): void
-    {
-        Media::fromPath($path)?->delete();
     }
 
     /** Detect type from magic bytes (not the extension or headers). */

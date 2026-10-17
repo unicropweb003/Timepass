@@ -32,5 +32,7 @@
         <env name="PULSE_ENABLED" value="false"/>
         <env name="TELESCOPE_ENABLED" value="false"/>
         <env name="NIGHTWATCH_ENABLED" value="false"/>
+        <!-- Never use real Cloudinary credentials from .env in tests; tests that need it inject a mocked client. -->
+        <env name="CLOUDINARY_URL" value="" force="true"/>
     </php>
 </phpunit>

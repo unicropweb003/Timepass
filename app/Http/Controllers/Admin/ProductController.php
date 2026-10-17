@@ -141,8 +141,7 @@ class ProductController extends Controller
     /** Delete a stored image of any generation: Cloudinary URL, media row, or old local file. */
     private function deleteImage(?string $path): void
     {
-        $this->uploader->delete($path);
-        ImagePipeline::deleteStored($path);
+        ImagePipeline::deleteStored($path); // Cloudinary file or media row
 
         // Older uploads were saved as files.
         if ($path && str_starts_with($path, 'images/products/') && file_exists(public_path($path))) {

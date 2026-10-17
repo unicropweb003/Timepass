@@ -36,10 +36,35 @@ class CloudinaryUploader
      */
     public function upload(UploadedFile $file, string $folder): string
     {
+        return $this->send($file->getRealPath(), $folder);
+    }
+
+    /**
+     * Upload image bytes that were already validated (e.g. an MCP/AI image) into
+     * "<CLOUDINARY_FOLDER>/<folder>". Sent as a data URI: nothing touches the disk.
+     *
+     * @return string the https secure_url to store in the database
+     *
+     * @throws RuntimeException when Cloudinary is not configured or the upload fails
+     */
+    public function uploadBytes(string $bytes, string $mime, string $folder): string
+    {
+        return $this->send('data:'.$mime.';base64,'.base64_encode($bytes), $folder);
+    }
+
+    /** True when uploads can be attempted: credentials configured, or a client was given. */
+    public function isConfigured(): bool
+    {
+        return $this->client !== null || filled(config('filesystems.disks.cloudinary.url'));
+    }
+
+    /** @param  string  $file  a local file path or a data URI */
+    private function send(string $file, string $folder): string
+    {
         $prefix = trim((string) config('filesystems.disks.cloudinary.folder'), '/');
         $folder = trim($prefix.'/'.trim($folder, '/'), '/');
 
-        $result = $this->client()->uploadApi()->upload($file->getRealPath(), [
+        $result = $this->client()->uploadApi()->upload($file, [
             'folder' => $folder,
             'resource_type' => 'image',
             'use_filename' => true,
