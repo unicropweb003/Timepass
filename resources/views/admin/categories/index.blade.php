@@ -20,7 +20,7 @@
 <div class="mb-6 flex flex-wrap items-end justify-between gap-4">
     <div>
         <h2 class="text-xl font-bold text-gray-900">All categories</h2>
-        <p class="mt-1 text-sm text-gray-500">{{ $categories->count() }} {{ \Illuminate\Support\Str::plural('category', $categories->count()) }} · organise your storefront</p>
+        <p class="mt-1 text-sm text-gray-500">{{ $categories->total() }} {{ \Illuminate\Support\Str::plural('category', $categories->total()) }} · organise your storefront</p>
     </div>
     <a href="{{ route('admin.categories.create') }}"
        class="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm shadow-indigo-500/30 transition hover:-translate-y-0.5 hover:bg-indigo-500">
@@ -102,4 +102,8 @@
         </div>
     @endforelse
 </div>
+
+@if ($categories->hasPages())
+    <div class="mt-6">{{ $categories->links() }}</div>
+@endif
 @endsection

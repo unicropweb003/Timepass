@@ -7,6 +7,7 @@ use App\Mcp\Support\ImagePipeline;
 use App\Models\Category;
 use App\Models\Product;
 use App\Services\CloudinaryUploader;
+use App\Support\PerPage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
@@ -22,7 +23,7 @@ class ProductController extends Controller
             ->when($request->query('q'), fn ($q, $term) => $q->where('name', 'like', "%{$term}%"))
             ->when($request->query('category'), fn ($q, $cat) => $q->where('category', $cat))
             ->orderBy('sort_order')->orderByDesc('id')
-            ->paginate(12)->withQueryString();
+            ->paginate(PerPage::from($request))->withQueryString();
 
         $categories = Category::orderBy('name')->get();
 

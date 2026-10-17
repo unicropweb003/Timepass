@@ -20,7 +20,7 @@
                 <div class="flex justify-between"><dt class="text-gray-500">Email</dt><dd class="font-medium text-gray-900">{{ $customer->email }}</dd></div>
                 <div class="flex justify-between"><dt class="text-gray-500">Phone</dt><dd class="font-medium text-gray-900">{{ $customer->phone ?: '—' }}</dd></div>
                 <div class="flex justify-between"><dt class="text-gray-500">Joined</dt><dd class="font-medium text-gray-900">{{ $customer->created_at->format('d M Y') }}</dd></div>
-                <div class="flex justify-between"><dt class="text-gray-500">Orders</dt><dd class="font-medium text-gray-900">{{ $customer->orders->count() }}</dd></div>
+                <div class="flex justify-between"><dt class="text-gray-500">Orders</dt><dd class="font-medium text-gray-900">{{ $orders->total() }}</dd></div>
             </dl>
             <form method="POST" action="{{ route('admin.customers.block', $customer) }}" class="mt-5" onsubmit="return confirm('{{ $customer->is_blocked ? 'Unblock' : 'Block' }} this customer?')">
                 @csrf @method('PATCH')
@@ -44,7 +44,7 @@
         <div class="rounded-2xl border border-gray-200 bg-white">
             <h2 class="border-b border-gray-100 px-6 py-4 font-semibold text-gray-900">Order history</h2>
             <div class="divide-y divide-gray-100">
-                @forelse ($customer->orders as $order)
+                @forelse ($orders as $order)
                     <a href="{{ route('admin.orders.show', $order) }}" class="flex items-center justify-between px-6 py-3 hover:bg-gray-50">
                         <div>
                             <p class="font-medium text-gray-900">#{{ $order->order_number }}</p>
@@ -59,6 +59,9 @@
                     <p class="px-6 py-10 text-center text-gray-500">No orders yet.</p>
                 @endforelse
             </div>
+            @if ($orders->hasPages())
+                <div class="border-t border-gray-100 px-6 py-3">{{ $orders->links() }}</div>
+            @endif
         </div>
     </div>
 </div>

@@ -5,15 +5,20 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Category;
 use App\Models\Product;
+use App\Support\PerPage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
 class CategoryController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $categories = Category::orderBy('sort_order')->orderBy('name')->get();
-        $counts = Product::selectRaw('category, COUNT(*) as c')->groupBy('category')->pluck('c', 'category');
+        $categories = Category::orderBy('sort_order')->orderBy('name')->orderBy('id')
+            ->paginate(PerPage::from($request))->withQueryString();
+
+        // Product counts for this page's categories only (uses the products.category index).
+        $counts = Product::whereIn('category', $categories->pluck('slug'))
+            ->selectRaw('category, COUNT(*) as c')->groupBy('category')->pluck('c', 'category');
 
         return view('admin.categories.index', compact('categories', 'counts'));
     }

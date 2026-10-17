@@ -4,13 +4,14 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Review;
+use App\Support\PerPage;
 use Illuminate\Http\Request;
 
 class ReviewController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $reviews = Review::orderBy('sort_order')->orderByDesc('id')->paginate(12);
+        $reviews = Review::orderBy('sort_order')->orderByDesc('id')->paginate(PerPage::from($request))->withQueryString();
 
         return view('admin.reviews.index', compact('reviews'));
     }

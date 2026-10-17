@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Address;
+use App\Support\PerPage;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
@@ -28,7 +29,9 @@ class AccountController extends Controller
 
     public function orders(Request $request)
     {
-        $orders = $request->user()->orders()->with('items')->latest()->paginate(10);
+        // The order card only shows item names and the total quantity.
+        $orders = $request->user()->orders()->with('items:id,order_id,product_name,quantity')->latest()
+            ->paginate(PerPage::from($request))->withQueryString();
 
         return view('account.orders', compact('orders'));
     }
@@ -43,7 +46,8 @@ class AccountController extends Controller
 
     public function transactions(Request $request)
     {
-        $transactions = $request->user()->transactions()->with('order')->latest()->paginate(15);
+        $transactions = $request->user()->transactions()->with('order:id,order_number')->latest()
+            ->paginate(PerPage::from($request))->withQueryString();
 
         return view('account.transactions', compact('transactions'));
     }

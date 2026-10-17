@@ -16,7 +16,7 @@ class AccountDemoSeeder extends Seeder
 {
     public function run(): void
     {
-        $email = env('ACCOUNT_DEMO_EMAIL');
+        $email = config('app.account_demo_email');
         $user = $email ? User::where('email', $email)->first() : User::latest('id')->first();
 
         if (! $user) {

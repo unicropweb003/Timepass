@@ -4,20 +4,21 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Order;
+use App\Support\PerPage;
 use Illuminate\Http\Request;
 
 class OrderController extends Controller
 {
     public function index(Request $request)
     {
-        $orders = Order::with('user')
+        $orders = Order::with('user:id,name')
             ->when($request->query('status'), fn ($q, $s) => $q->where('status', $s))
-            ->when($request->query('q'), function ($q, $term) {
-                $q->where('order_number', 'like', "%{$term}%")
-                    ->orWhereHas('user', fn ($u) => $u->where('name', 'like', "%{$term}%")->orWhere('email', 'like', "%{$term}%"));
-            })
+            // Grouped, so a search never escapes the status filter (… AND (number OR customer)).
+            ->when($request->query('q'), fn ($q, $term) => $q->where(fn ($w) => $w
+                ->where('order_number', 'like', "%{$term}%")
+                ->orWhereHas('user', fn ($u) => $u->where('name', 'like', "%{$term}%")->orWhere('email', 'like', "%{$term}%"))))
             ->latest()
-            ->paginate(15)->withQueryString();
+            ->paginate(PerPage::from($request))->withQueryString();
 
         $statuses = array_keys(Order::STEPS);
 

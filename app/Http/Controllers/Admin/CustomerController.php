@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Support\PerPage;
 use Illuminate\Http\Request;
 
 class CustomerController extends Controller
@@ -11,6 +12,7 @@ class CustomerController extends Controller
     public function index(Request $request)
     {
         $customers = User::where('is_admin', false)
+            ->select(['id', 'name', 'email', 'phone', 'is_blocked', 'created_at'])
             ->withCount('orders')
             ->when($request->query('q'), function ($q, $term) {
                 $q->where(fn ($w) => $w->where('name', 'like', "%{$term}%")
@@ -18,17 +20,20 @@ class CustomerController extends Controller
                     ->orWhere('phone', 'like', "%{$term}%"));
             })
             ->latest()
-            ->paginate(15)->withQueryString();
+            ->paginate(PerPage::from($request))->withQueryString();
 
         return view('admin.customers.index', compact('customers'));
     }
 
-    public function show(User $customer)
+    public function show(Request $request, User $customer)
     {
         abort_if($customer->is_admin, 404);
-        $customer->load(['orders' => fn ($q) => $q->latest(), 'addresses']);
+        $customer->load('addresses');
 
-        return view('admin.customers.show', compact('customer'));
+        // Paginated instead of loading every order the customer ever placed.
+        $orders = $customer->orders()->latest()->paginate(PerPage::from($request))->withQueryString();
+
+        return view('admin.customers.show', compact('customer', 'orders'));
     }
 
     public function toggleBlock(User $customer)

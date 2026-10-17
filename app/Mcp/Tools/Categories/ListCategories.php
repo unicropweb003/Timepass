@@ -5,6 +5,7 @@ namespace App\Mcp\Tools\Categories;
 use App\Mcp\Support\Finder;
 use App\Mcp\Support\Present;
 use App\Models\Category;
+use App\Models\Product;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Laravel\Mcp\Request;
 use Laravel\Mcp\Response;
@@ -38,6 +39,7 @@ class ListCategories extends Tool
         }
 
         $page = Category::query()
+            ->with('parent:id,name')
             ->when($data['search'] ?? null, fn ($q, $s) => $q->where(fn ($w) => $w
                 ->whereRaw('LOWER(name) LIKE ?', ['%'.mb_strtolower($s).'%'])
                 ->orWhere('slug', 'like', '%'.$s.'%')))
@@ -47,7 +49,11 @@ class ListCategories extends Tool
             ->orderBy('sort_order')->orderBy('name')
             ->paginate($data['per_page'] ?? 50, ['*'], 'page', $data['page'] ?? 1);
 
-        $items = $page->getCollection()->map(fn (Category $c) => Present::category($c))->all();
+        // One grouped query for all product counts on this page (was one query per category).
+        $counts = Product::whereIn('category', $page->getCollection()->pluck('slug'))
+            ->selectRaw('category, COUNT(*) as c')->groupBy('category')->pluck('c', 'category');
+
+        $items = $page->getCollection()->map(fn (Category $c) => Present::category($c, (int) ($counts[$c->slug] ?? 0)))->all();
 
         return Present::reply(
             "Found {$page->total()} categor".($page->total() === 1 ? 'y' : 'ies')."; showing page {$page->currentPage()} of {$page->lastPage()}.",

@@ -58,6 +58,10 @@ return [
     // instead of the host the request arrived on (an origin's own URL).
     'force_url' => (bool) env('APP_FORCE_URL', false),
 
+    // Account that AccountDemoSeeder fills with demo orders (default: newest user).
+    // Read here, not in the seeder, so it still works after `php artisan config:cache`.
+    'account_demo_email' => env('ACCOUNT_DEMO_EMAIL'),
+
     /*
     |--------------------------------------------------------------------------
     | Application Timezone

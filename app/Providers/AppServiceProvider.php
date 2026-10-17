@@ -2,7 +2,15 @@
 
 namespace App\Providers;
 
+use App\Models\Category;
+use App\Models\ContactMessage;
+use App\Models\Order;
+use App\Models\Product;
+use App\Models\Transaction;
+use App\Models\User;
+use App\Observers\AdminDashboardObserver;
 use App\Services\CloudinaryUploader;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 
@@ -23,6 +31,15 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Development and tests fail loudly on N+1 queries (a relation lazy-loaded
+        // inside a loop); production never throws for it.
+        Model::preventLazyLoading(! $this->app->isProduction());
+
+        // Keep the cached admin dashboard in step with the records it shows.
+        foreach ([Order::class, Transaction::class, Product::class, Category::class, ContactMessage::class, User::class] as $model) {
+            $model::observe(AdminDashboardObserver::class);
+        }
+
         if (config('app.env') === 'production') {
             URL::forceScheme('https');
         }

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\ContactMessage;
+use App\Support\PerPage;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 
@@ -24,7 +25,7 @@ class ContactMessageController extends Controller
             ->when($status === 'unread', fn ($query) => $query->whereNull('read_at'))
             ->when(isset(ContactMessage::STATUSES[$status]), fn ($query) => $query->where('status', $status))
             ->latest()
-            ->paginate(15)
+            ->paginate(PerPage::from($request))
             ->withQueryString();
 
         $counts = ContactMessage::query()

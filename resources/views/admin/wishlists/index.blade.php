@@ -3,7 +3,7 @@
 @section('content')
 @php
     $catNames = collect(config('shop.categories', []))->pluck('name', 'slug');
-    $max = max(1, $rows->max('wish_count') ?? 1);
+    $max = max(1, $maxCount);
 @endphp
 
 <div class="mb-6">
@@ -37,13 +37,13 @@
 <div class="mt-6 overflow-hidden rounded-2xl border border-gray-200 bg-white">
     <div class="flex items-center justify-between border-b border-gray-100 px-6 py-4">
         <h3 class="font-semibold text-gray-900">Most wishlisted products</h3>
-        <span class="text-xs text-gray-400">{{ $rows->count() }} products</span>
+        <span class="text-xs text-gray-400">{{ $rows->total() }} products</span>
     </div>
     <div class="divide-y divide-gray-100">
         @forelse ($rows as $i => $row)
             @php $p = $row->product; @endphp
             <div class="flex items-center gap-4 px-6 py-4">
-                <span class="w-6 shrink-0 text-center text-sm font-black text-gray-300">{{ $i + 1 }}</span>
+                <span class="w-6 shrink-0 text-center text-sm font-black text-gray-300">{{ $rows->firstItem() + $i }}</span>
                 <span class="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-gray-100 bg-gray-50">
                     <img src="{{ asset($p->image ?: 'images/no-image.svg') }}" onerror="this.onerror=null;this.src='{{ asset('images/no-image.svg') }}';" alt="" class="h-full w-full object-contain p-1">
                 </span>
@@ -69,5 +69,8 @@
             </div>
         @endforelse
     </div>
+    @if ($rows->hasPages())
+        <div class="border-t border-gray-100 px-6 py-3">{{ $rows->links() }}</div>
+    @endif
 </div>
 @endsection

@@ -45,4 +45,4 @@ RUN composer install --no-dev --optimize-autoloader
 # instance migrates/seeds the shared database on start (see LOAD-BALANCING.md).
 # --isolated: with a shared cache (Redis/database) instances starting together
 # take a lock, so only one runs the migrations.
-CMD sh -c "if [ \"${RUN_MIGRATIONS:-true}\" = true ]; then php artisan migrate --force --isolated &&(php artisan db:seed --force || echo 'db:seed failed - starting anyway'); fi && php artisan config:cache && php artisan route:cache && php artisan view:cache && php artisan serve --no-reload --host=0.0.0.0 --port=${PORT:-10000}"
+CMD sh -c "if [ \"${RUN_MIGRATIONS:-true}\" = true ]; then php artisan migrate --force --isolated && (php artisan db:seed --force || echo 'db:seed failed - starting anyway'); fi && php artisan config:cache && php artisan route:cache && php artisan view:cache && php artisan event:cache && php artisan serve --no-reload --host=0.0.0.0 --port=${PORT:-10000}"

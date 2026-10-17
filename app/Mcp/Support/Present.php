@@ -54,7 +54,8 @@ class Present
         ];
     }
 
-    public static function category(Category $c): array
+    /** $productCount: pass it when listing many categories (one grouped query instead of one per category). */
+    public static function category(Category $c, ?int $productCount = null): array
     {
         return [
             'id' => $c->id,
@@ -68,7 +69,7 @@ class Present
             'types' => $c->types ?: [],
             'status' => $c->is_active ? 'active' : 'inactive',
             'sort_order' => (int) $c->sort_order,
-            'product_count' => Product::where('category', $c->slug)->count(),
+            'product_count' => $productCount ?? Product::where('category', $c->slug)->count(),
             'page_url' => route('products', ['category' => $c->slug]),
             'created_at' => $c->created_at?->toIso8601String(),
             'updated_at' => $c->updated_at?->toIso8601String(),
