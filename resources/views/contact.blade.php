@@ -23,15 +23,6 @@
         </p>
     </div>
 
-    @if (session('status'))
-        <div class="mx-auto mt-8 flex max-w-3xl items-center gap-3 rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm font-medium text-green-700">
-            <svg class="h-5 w-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
-            </svg>
-            {{ session('status') }}
-        </div>
-    @endif
-
     <div class="mt-10 grid grid-cols-1 gap-6 lg:grid-cols-5">
 
         {{-- Left: contact information panel --}}
@@ -132,31 +123,84 @@
             </div>
         </div>
 
-        {{-- Right: contact form --}}
+        {{-- Right: contact form (or the thank-you panel once it is sent) --}}
         <div class="lg:col-span-3">
+            @if ($sent = session('contact_sent'))
+                <div class="flex h-full flex-col items-center justify-center rounded-2xl border border-emerald-200 bg-white p-8 text-center shadow-sm sm:p-12" role="status">
+                    <span class="flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 ring-8 ring-emerald-50">
+                        <svg class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5"/>
+                        </svg>
+                    </span>
+                    <h2 class="mt-6 text-2xl font-bold text-gray-900">Thank you, {{ $sent['name'] }}!</h2>
+                    <p class="mt-3 max-w-md text-gray-600">
+                        We have received your message. <strong class="text-gray-900">Our team will contact you soon</strong>,
+                        usually within one business day.
+                    </p>
+                    <div class="mt-6 w-full max-w-sm space-y-2 rounded-xl bg-gray-50 p-4 text-left text-sm">
+                        <p class="text-xs font-semibold uppercase tracking-wide text-gray-500">We will reach you at</p>
+                        <p class="flex items-center gap-2 text-gray-800">
+                            <svg class="h-4 w-4 flex-shrink-0 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75"/></svg>
+                            <span class="break-all">{{ $sent['email'] }}</span>
+                        </p>
+                        @if (! empty($sent['phone']))
+                            <p class="flex items-center gap-2 text-gray-800">
+                                <svg class="h-4 w-4 flex-shrink-0 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 0 0 2.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 0 1-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 0 0-1.091-.852H4.5A2.25 2.25 0 0 0 2.25 4.5v2.25Z"/></svg>
+                                {{ $sent['phone'] }}
+                            </p>
+                        @endif
+                    </div>
+                    <div class="mt-8 flex flex-wrap justify-center gap-3">
+                        <a href="{{ route('products') }}" class="rounded-lg bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-500">Continue shopping</a>
+                        <a href="{{ route('contact') }}" class="rounded-lg border border-gray-300 px-5 py-2.5 text-sm font-semibold text-gray-700 transition hover:bg-gray-50">Send another message</a>
+                    </div>
+                </div>
+            @else
+            @php $me = auth()->user(); @endphp
             <form method="POST" action="{{ route('contact.submit') }}" class="h-full rounded-2xl border border-gray-200 bg-white p-8 shadow-sm">
                 @csrf
                 <h2 class="text-xl font-bold text-gray-900">Send us a message</h2>
-                <p class="mt-1 text-sm text-gray-500">We usually reply within one business day.</p>
+                <p class="mt-1 text-sm text-gray-500">Fill in your details and our team will contact you, usually within one business day.</p>
 
                 <div class="mt-6 space-y-5">
                     <div>
-                        <label for="name" class="block text-sm font-medium text-gray-700">Your name</label>
-                        <input type="text" id="name" name="name" value="{{ old('name') }}" placeholder="Jane Doe"
+                        <label for="name" class="block text-sm font-medium text-gray-700">Your name <span class="text-red-500">*</span></label>
+                        <input type="text" id="name" name="name" value="{{ old('name', $me?->name) }}" placeholder="Jane Doe" required autocomplete="name"
                             class="mt-1 block w-full rounded-lg border px-3.5 py-2.5 shadow-sm transition focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500 @error('name') border-red-400 @else border-gray-300 @enderror">
                         @error('name') <p class="mt-1.5 text-sm text-red-600">{{ $message }}</p> @enderror
                     </div>
 
-                    <div>
-                        <label for="email" class="block text-sm font-medium text-gray-700">Email address</label>
-                        <input type="email" id="email" name="email" value="{{ old('email') }}" placeholder="you@example.com"
-                            class="mt-1 block w-full rounded-lg border px-3.5 py-2.5 shadow-sm transition focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500 @error('email') border-red-400 @else border-gray-300 @enderror">
-                        @error('email') <p class="mt-1.5 text-sm text-red-600">{{ $message }}</p> @enderror
+                    <div class="grid gap-5 sm:grid-cols-2">
+                        <div>
+                            <label for="email" class="block text-sm font-medium text-gray-700">Email address <span class="text-red-500">*</span></label>
+                            <input type="email" id="email" name="email" value="{{ old('email', $me?->email) }}" placeholder="you@example.com" required autocomplete="email"
+                                class="mt-1 block w-full rounded-lg border px-3.5 py-2.5 shadow-sm transition focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500 @error('email') border-red-400 @else border-gray-300 @enderror">
+                            @error('email') <p class="mt-1.5 text-sm text-red-600">{{ $message }}</p> @enderror
+                        </div>
+
+                        <div>
+                            <label for="phone" class="block text-sm font-medium text-gray-700">Phone number <span class="font-normal text-gray-400">(optional)</span></label>
+                            <input type="tel" id="phone" name="phone" value="{{ old('phone', $me?->phone) }}" placeholder="+91 98765 43210" autocomplete="tel"
+                                class="mt-1 block w-full rounded-lg border px-3.5 py-2.5 shadow-sm transition focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500 @error('phone') border-red-400 @else border-gray-300 @enderror">
+                            @error('phone') <p class="mt-1.5 text-sm text-red-600">{{ $message }}</p> @enderror
+                        </div>
                     </div>
 
                     <div>
-                        <label for="message" class="block text-sm font-medium text-gray-700">Message</label>
-                        <textarea id="message" name="message" rows="5" placeholder="How can we help you?"
+                        <label for="subject" class="block text-sm font-medium text-gray-700">What is it about?</label>
+                        <select id="subject" name="subject"
+                            class="mt-1 block w-full rounded-lg border bg-white px-3.5 py-2.5 shadow-sm transition focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500 @error('subject') border-red-400 @else border-gray-300 @enderror">
+                            <option value="">Choose a topic</option>
+                            @foreach (\App\Models\ContactMessage::SUBJECTS as $subject)
+                                <option value="{{ $subject }}" @selected(old('subject') === $subject)>{{ $subject }}</option>
+                            @endforeach
+                        </select>
+                        @error('subject') <p class="mt-1.5 text-sm text-red-600">{{ $message }}</p> @enderror
+                    </div>
+
+                    <div>
+                        <label for="message" class="block text-sm font-medium text-gray-700">Message <span class="text-red-500">*</span></label>
+                        <textarea id="message" name="message" rows="5" placeholder="How can we help you?" required minlength="5"
                             class="mt-1 block w-full rounded-lg border px-3.5 py-2.5 shadow-sm transition focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500 @error('message') border-red-400 @else border-gray-300 @enderror">{{ old('message') }}</textarea>
                         @error('message') <p class="mt-1.5 text-sm text-red-600">{{ $message }}</p> @enderror
                     </div>
@@ -170,6 +214,7 @@
                     </button>
                 </div>
             </form>
+            @endif
         </div>
     </div>
 </div>

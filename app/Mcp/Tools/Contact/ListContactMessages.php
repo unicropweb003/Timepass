@@ -30,6 +30,7 @@ class ListContactMessages extends Tool
             ->when($data['search'] ?? null, fn ($q, $s) => $q->where(fn ($w) => $w
                 ->whereRaw('LOWER(name) LIKE ?', ['%'.mb_strtolower($s).'%'])
                 ->orWhereRaw('LOWER(email) LIKE ?', ['%'.mb_strtolower($s).'%'])
+                ->orWhere('phone', 'like', '%'.$s.'%')
                 ->orWhereRaw('LOWER(message) LIKE ?', ['%'.mb_strtolower($s).'%'])))
             ->when(! empty($data['unread_only']), fn ($q) => $q->whereNull('read_at'))
             ->latest('id')
@@ -39,6 +40,9 @@ class ListContactMessages extends Tool
             'id' => $m->id,
             'name' => $m->name,
             'email' => $m->email,
+            'phone' => $m->phone,
+            'subject' => $m->subject,
+            'status' => $m->status,
             'preview' => mb_strimwidth((string) $m->message, 0, 140, '…'),
             'read' => $m->read_at !== null,
             'received_at' => $m->created_at?->toIso8601String(),
@@ -53,7 +57,7 @@ class ListContactMessages extends Tool
     public function schema(JsonSchema $schema): array
     {
         return [
-            'search' => $schema->string()->description('Text to match in name, email or message.'),
+            'search' => $schema->string()->description('Text to match in name, email, phone or message.'),
             'unread_only' => $schema->boolean()->description('Only messages not yet read.'),
             'page' => $schema->integer()->description('Page number (default 1).'),
             'per_page' => $schema->integer()->description('Items per page (default 25, max 100).'),

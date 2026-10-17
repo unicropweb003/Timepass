@@ -116,7 +116,7 @@
     <div class="space-y-4">
         <a href="{{ route('admin.messages.index') }}" class="flex items-center justify-between rounded-2xl border border-gray-200 bg-white p-5 transition hover:-translate-y-0.5 hover:shadow-md">
             <div>
-                <p class="text-sm text-gray-500">Unread messages</p>
+                <p class="text-sm text-gray-500">Unread contact leads</p>
                 <p class="mt-1 text-2xl font-black text-gray-900">{{ $stats['unread_messages'] }}</p>
             </div>
             <span class="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 text-white shadow-md">
@@ -185,7 +185,7 @@
     {{-- Recent messages --}}
     <div class="rounded-2xl border border-gray-200 bg-white">
         <div class="flex items-center justify-between border-b border-gray-100 px-6 py-4">
-            <h2 class="font-semibold text-gray-900">Recent messages</h2>
+            <h2 class="font-semibold text-gray-900">Recent contact leads</h2>
             <a href="{{ route('admin.messages.index') }}" class="text-sm font-medium text-indigo-600 hover:underline">View all</a>
         </div>
         <div class="divide-y divide-gray-100">
@@ -195,14 +195,14 @@
                         <p class="font-medium text-gray-900">{{ $msg->name }}</p>
                         @unless ($msg->read_at)<span class="h-2 w-2 rounded-full bg-indigo-500"></span>@endunless
                     </div>
-                    <p class="truncate text-xs text-gray-500">{{ $msg->message }}</p>
+                    <p class="truncate text-xs text-gray-500">{{ $msg->phone ? $msg->phone.' · ' : '' }}{{ $msg->message }}</p>
                 </a>
             @empty
                 <div class="flex flex-col items-center px-6 py-10 text-center">
                     <span class="flex h-12 w-12 items-center justify-center rounded-full bg-gray-100 text-gray-400">
                         <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M8.625 12a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H8.25m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H12m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 0 1-2.555-.337A5.972 5.972 0 0 1 5.41 20.97a5.969 5.969 0 0 1-.474-.065 4.48 4.48 0 0 0 .978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25Z"/></svg>
                     </span>
-                    <p class="mt-3 text-sm font-medium text-gray-500">No messages yet</p>
+                    <p class="mt-3 text-sm font-medium text-gray-500">No contact leads yet</p>
                     <p class="text-xs text-gray-400">Customer enquiries from the contact form show up here.</p>
                 </div>
             @endforelse

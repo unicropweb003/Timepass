@@ -6,6 +6,7 @@ use App\Models\ContactMessage;
 use App\Support\ShopData;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 
 class ShopController extends Controller
 {
@@ -308,12 +309,24 @@ class ShopController extends Controller
     {
         $data = $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'email'],
-            'message' => ['required', 'string', 'min:5'],
+            'email' => ['required', 'email', 'max:255'],
+            'phone' => ['nullable', 'string', 'max:20', 'regex:/^\+?[0-9\s\-()]{7,20}$/'],
+            'subject' => ['nullable', 'string', Rule::in(ContactMessage::SUBJECTS)],
+            'message' => ['required', 'string', 'min:5', 'max:5000'],
+        ], [
+            'phone.regex' => 'Please enter a valid phone number.',
         ]);
 
-        ContactMessage::create($data);
+        // Saved as a lead for the admin panel (Contact Leads).
+        ContactMessage::create($data + [
+            'user_id' => $request->user()?->id,
+            'ip_address' => $request->ip(),
+        ]);
 
-        return back()->with('status', 'Thanks! Your message has been sent.');
+        return redirect()->route('contact')->with('contact_sent', [
+            'name' => $data['name'],
+            'email' => $data['email'],
+            'phone' => $data['phone'] ?? null,
+        ]);
     }
 }

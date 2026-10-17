@@ -35,7 +35,11 @@ class GetContactMessage extends Tool
             'id' => $message->id,
             'name' => $message->name,
             'email' => $message->email,
+            'phone' => $message->phone,
+            'subject' => $message->subject,
             'message' => $message->message,
+            'status' => $message->status,
+            'customer_id' => $message->user_id,
             'read_at' => $message->read_at?->toIso8601String(),
             'received_at' => $message->created_at?->toIso8601String(),
         ]);
