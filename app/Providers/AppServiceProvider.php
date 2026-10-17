@@ -28,7 +28,14 @@ class AppServiceProvider extends ServiceProvider
         }
 
         if (config('app.force_url')) {
-            URL::forceRootUrl(config('app.url'));
+            // Host and scheme both come from APP_URL: forceRootUrl() alone keeps the
+            // incoming request's scheme, so a request reaching an origin over plain
+            // http (e.g. from the load balancer) would otherwise get http:// links.
+            $root = rtrim((string) config('app.url'), '/');
+            URL::forceRootUrl($root);
+            if ($scheme = parse_url($root, PHP_URL_SCHEME)) {
+                URL::forceScheme($scheme);
+            }
         }
     }
 }

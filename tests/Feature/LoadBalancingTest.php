@@ -7,6 +7,7 @@ use App\Models\Product;
 use App\Providers\AppServiceProvider;
 use App\Support\ShopData;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\URL;
@@ -58,11 +59,26 @@ class LoadBalancingTest extends TestCase
 
     public function test_links_use_the_public_address_when_forced(): void
     {
-        config(['app.url' => 'https://shop.example.com', 'app.force_url' => true]);
+        // A request that reached an origin directly, over plain http, on its own host.
+        URL::setRequest(Request::create('http://origin-b.internal/products'));
+
+        config(['app.env' => 'testing', 'app.url' => 'https://shop.example.com', 'app.force_url' => true]);
         (new AppServiceProvider($this->app))->boot();
 
         $this->assertSame('https://shop.example.com/products', route('products'));
+        $this->assertSame('https://shop.example.com/media/7', asset('media/7'));
 
         URL::forceRootUrl(null);
+        URL::forceScheme(null);
+    }
+
+    public function test_links_are_untouched_when_not_forced(): void
+    {
+        URL::setRequest(Request::create('http://origin-b.internal/products'));
+
+        config(['app.env' => 'testing', 'app.url' => 'https://shop.example.com', 'app.force_url' => false]);
+        (new AppServiceProvider($this->app))->boot();
+
+        $this->assertSame('http://origin-b.internal/products', route('products'));
     }
 }
