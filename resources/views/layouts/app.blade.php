@@ -387,7 +387,7 @@
         </div>
     </header>
 
-    <main class="mx-auto max-w-7xl px-4 py-8 sm:px-6">
+    <main class="{{ request()->routeIs('about') ? 'w-full' : 'mx-auto max-w-7xl px-4 py-8 sm:px-6' }}">
         @yield('content')
     </main>
 
