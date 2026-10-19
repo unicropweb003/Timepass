@@ -29,95 +29,101 @@
 
     /* TimePass promo card animations: start */
     #promos .tp-promo-card { transition: transform .35s ease-out; }
-    #promos .tp-promo-card:is(:hover, :focus-visible, :active) { transform: translateY(-5px); }
+    #promos .tp-promo-card:is(:hover, :focus-visible, :active) { transform: translateY(-7px); }
     #promos .tp-promo-card:focus-visible { outline: 3px solid #4f46e5; outline-offset: 4px; }
     #promos .tp-promo-visual { transition: transform .55s ease-out; }
-    #promos .tp-promo-card:is(:hover, :focus-visible, :active) .tp-promo-visual { transform: scale(1.025); }
+    #promos .tp-promo-card:is(:hover, :focus-visible, :active) .tp-promo-visual { transform: scale(1.05); }
     #promos .tp-promo-arrow { transition: transform .35s ease-out; }
-    #promos .tp-promo-card:is(:hover, :focus-visible, :active) .tp-promo-arrow { transform: translateX(3px); }
+    #promos .tp-promo-card:is(:hover, :focus-visible, :active) .tp-promo-arrow { transform: translateX(5px); }
 
-    /* The photos are single JPGs: light passes over each product area in sequence. */
+    /* The products share one photo, so three soft reveals pass over their positions in order. */
     #promos .tp-promo-skin-glow {
-        position: absolute; bottom: 7%; width: 27%; height: 48%; border-radius: 50%;
-        background: radial-gradient(ellipse, rgba(255,255,255,.35) 0%, rgba(255,255,255,0) 70%);
-        opacity: 0; animation: tp-promo-skin-pass 9s ease-in-out infinite;
+        position: absolute; bottom: 3%; width: 25%; height: 59%; border-radius: 50%;
+        background: radial-gradient(ellipse, rgba(255,255,255,.7) 0%, rgba(245,239,255,.36) 40%, rgba(255,255,255,0) 76%);
+        opacity: 0; animation: tp-promo-skin-pass 7.5s ease-in-out infinite;
     }
-    #promos .tp-promo-skin-glow:nth-child(1) { left: 2%; }
-    #promos .tp-promo-skin-glow:nth-child(2) { left: 29%; animation-delay: 3s; }
-    #promos .tp-promo-skin-glow:nth-child(3) { left: 56%; animation-delay: 6s; }
+    #promos .tp-promo-skin-glow:nth-child(1) { left: 6%; }
+    #promos .tp-promo-skin-glow:nth-child(2) { left: 30%; width: 22%; animation-delay: 2.5s; }
+    #promos .tp-promo-skin-glow:nth-child(3) { left: 49%; animation-delay: 5s; }
     @keyframes tp-promo-skin-pass {
-        0%, 11%, 32%, 100% { opacity: 0; transform: translateY(5px); }
-        18%, 25% { opacity: .8; transform: translateY(-4px); }
+        0%, 5%, 33%, 100% { opacity: 0; transform: translateY(7px); }
+        12%, 26% { opacity: .86; transform: translateY(-3px); }
     }
 
-    /* Localized mint glints give each printed toothpaste tube its own gentle rhythm. */
+    /* The toothpaste photo floats as one layer; mint glints follow the three tube positions. */
+    #promos .tp-promo-card--toothpaste .tp-promo-image {
+        animation: tp-promo-tooth-float 5.6s ease-in-out infinite;
+    }
     #promos .tp-promo-mint-glow {
-        position: absolute; bottom: 11%; width: 13%; height: 39%; border-radius: 50%;
-        background: radial-gradient(ellipse, rgba(219,255,233,.33), rgba(219,255,233,0) 75%);
-        opacity: .15; animation: tp-promo-mint-float 7s ease-in-out infinite;
+        position: absolute; bottom: 8%; width: 24%; height: 55%; border-radius: 50%;
+        background: radial-gradient(ellipse, rgba(225,255,238,.48), rgba(219,255,233,0) 76%);
+        opacity: .18; animation: tp-promo-mint-float 5.6s ease-in-out infinite;
     }
-    #promos .tp-promo-mint-glow:nth-child(1) { left: 23%; }
-    #promos .tp-promo-mint-glow:nth-child(2) { left: 45%; animation-delay: -2.2s; }
-    #promos .tp-promo-mint-glow:nth-child(3) { left: 68%; animation-delay: -4.4s; }
+    #promos .tp-promo-mint-glow:nth-child(1) { left: 13%; }
+    #promos .tp-promo-mint-glow:nth-child(2) { left: 38%; animation-delay: -1.8s; }
+    #promos .tp-promo-mint-glow:nth-child(3) { left: 62%; animation-delay: -3.6s; }
     #promos .tp-promo-sparkle {
-        position: absolute; width: 5px; height: 5px; border-radius: 50%;
-        background: rgba(235,255,244,.9); opacity: 0;
-        animation: tp-promo-sparkle 6s ease-in-out infinite;
+        position: absolute; width: 7px; height: 7px; border-radius: 50%;
+        background: #f0fff5; box-shadow: 0 0 9px rgba(255,255,255,.85); opacity: 0;
+        animation: tp-promo-sparkle 5.6s ease-in-out infinite;
     }
-    #promos .tp-promo-sparkle:nth-child(4) { left: 20%; top: 55%; }
-    #promos .tp-promo-sparkle:nth-child(5) { left: 55%; top: 48%; animation-delay: -2s; }
-    #promos .tp-promo-sparkle:nth-child(6) { left: 78%; top: 61%; animation-delay: -4s; }
+    #promos .tp-promo-sparkle:nth-child(4) { left: 19%; top: 43%; }
+    #promos .tp-promo-sparkle:nth-child(5) { left: 55%; top: 48%; animation-delay: -1.8s; }
+    #promos .tp-promo-sparkle:nth-child(6) { left: 78%; top: 59%; animation-delay: -3.6s; }
+    @keyframes tp-promo-tooth-float {
+        0%, 100% { transform: translateY(0) scale(1.015); }
+        50% { transform: translateY(-5px) scale(1.025); }
+    }
     @keyframes tp-promo-mint-float {
-        0%, 100% { opacity: .12; transform: translateY(3px); }
-        50% { opacity: .55; transform: translateY(-6px); }
+        0%, 100% { opacity: .18; transform: translateY(5px); }
+        50% { opacity: .8; transform: translateY(-9px); }
     }
     @keyframes tp-promo-sparkle {
-        0%, 35%, 100% { opacity: 0; transform: scale(.7); }
-        55%, 70% { opacity: .7; transform: scale(1); }
+        0%, 25%, 75%, 100% { opacity: 0; transform: scale(.6); }
+        38%, 58% { opacity: .95; transform: scale(1.2); }
     }
 
     #promos .tp-promo-card--hydration .tp-promo-image {
-        animation: tp-promo-hydration-zoom 14s ease-in-out infinite;
+        animation: tp-promo-hydration-zoom 12s ease-in-out infinite;
     }
     #promos .tp-promo-ripple {
-        position: absolute; left: 24%; bottom: 8%; width: 52%; height: 13%;
-        border: 1px solid rgba(255,255,255,.53); border-radius: 50%; opacity: 0;
-        animation: tp-promo-ripple 9s ease-out infinite;
+        position: absolute; left: 23%; bottom: 7%; width: 54%; height: 13%;
+        border: 2px solid rgba(255,255,255,.7); border-radius: 50%; opacity: 0;
+        animation: tp-promo-ripple 8s ease-out infinite;
     }
-    #promos .tp-promo-ripple:nth-child(2) { animation-delay: -4.5s; }
+    #promos .tp-promo-ripple:nth-child(2) { animation-delay: -4s; }
     @keyframes tp-promo-hydration-zoom {
         0%, 100% { transform: scale(1); }
-        50% { transform: scale(1.06); }
+        50% { transform: scale(1.075); }
     }
     @keyframes tp-promo-ripple {
         0% { opacity: 0; transform: scale(.75); }
-        25% { opacity: .42; }
-        65%, 100% { opacity: 0; transform: scale(1.4); }
+        20% { opacity: .58; }
+        65%, 100% { opacity: 0; transform: scale(1.5); }
     }
 
     #promos .tp-promo-shine {
-        position: absolute; top: 39%; left: -55%; width: 37%; height: 65%;
-        background: linear-gradient(90deg, rgba(255,255,255,0), rgba(255,255,255,.26), rgba(255,255,255,0));
-        opacity: 0; animation: tp-promo-shine 9s ease-in-out infinite;
+        position: absolute; top: 36%; left: -60%; width: 43%; height: 65%;
+        background: linear-gradient(90deg, rgba(255,255,255,0), rgba(255,255,255,.48), rgba(255,255,255,0));
+        opacity: 0; animation: tp-promo-shine 7s ease-in-out infinite;
     }
     #promos .tp-promo-bubble {
-        position: absolute; bottom: 8%; width: 8px; height: 8px; border: 1px solid rgba(255,255,255,.8);
-        border-radius: 50%; background: rgba(255,255,255,.16); opacity: 0;
-        animation: tp-promo-bubble 8s ease-in-out infinite;
+        position: absolute; bottom: 8%; width: 10px; height: 10px; border: 1px solid rgba(255,255,255,.9);
+        border-radius: 50%; background: rgba(255,255,255,.3); opacity: 0;
+        animation: tp-promo-bubble 7s ease-in-out infinite;
     }
     #promos .tp-promo-bubble:nth-child(2) { left: 31%; animation-delay: -2s; }
-    #promos .tp-promo-bubble:nth-child(3) { left: 57%; width: 5px; height: 5px; animation-delay: -4s; }
-    #promos .tp-promo-bubble:nth-child(4) { left: 72%; width: 6px; height: 6px; animation-delay: -6s; }
+    #promos .tp-promo-bubble:nth-child(3) { left: 57%; width: 7px; height: 7px; animation-delay: -4s; }
+    #promos .tp-promo-bubble:nth-child(4) { left: 72%; width: 8px; height: 8px; animation-delay: -6s; }
     @keyframes tp-promo-shine {
-        0%, 48% { opacity: 0; transform: translateX(0) skewX(-16deg); }
-        55% { opacity: .55; }
-        77% { opacity: .55; }
-        84%, 100% { opacity: 0; transform: translateX(540%) skewX(-16deg); }
+        0%, 10% { opacity: 0; transform: translateX(0) skewX(-16deg); }
+        20%, 53% { opacity: .8; }
+        68%, 100% { opacity: 0; transform: translateX(470%) skewX(-16deg); }
     }
     @keyframes tp-promo-bubble {
         0%, 100% { opacity: 0; transform: translateY(0); }
-        25% { opacity: .65; }
-        75% { opacity: 0; transform: translateY(-25px); }
+        25% { opacity: .8; }
+        75% { opacity: 0; transform: translateY(-65px); }
     }
 
     @media (prefers-reduced-motion: reduce) {
@@ -419,7 +425,7 @@
         @foreach ($promos as $i => $promo)
             <div data-reveal style="transition-delay: {{ $i * 70 }}ms">
                 <a href="{{ route('products', array_filter(['category' => $promo['category'], 'type' => $promo['type'] ?? null])) }}"
-                    class="tp-promo-card group relative block aspect-[8/11] overflow-hidden rounded-2xl bg-gray-100 shadow-sm ring-1 ring-gray-900/5 {{ $i === 2 ? 'tp-promo-card--hydration' : '' }}">
+                    class="tp-promo-card group relative block aspect-[8/11] overflow-hidden rounded-2xl bg-gray-100 shadow-sm ring-1 ring-gray-900/5 {{ $i === 1 ? 'tp-promo-card--toothpaste' : '' }} {{ $i === 2 ? 'tp-promo-card--hydration' : '' }}">
                     <span class="tp-promo-visual absolute inset-0 overflow-hidden">
                         <img src="{{ asset($promo['image']) }}" width="800" height="1100"
                             onerror="this.onerror=null;this.src='{{ asset('images/no-image.svg') }}';"
