@@ -1,4 +1,4 @@
-@extends('layouts.app', ['title' => $product['name']])
+@extends('layouts.app', ['seo' => \App\Support\Seo::product($product)])
 
 @section('content')
 <script>document.documentElement.classList.add('pd-js');</script>
@@ -93,7 +93,7 @@
 
         <h1 class="font-display mt-3 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">{{ $product['name'] }}</h1>
 
-        @if (! empty($product['rating']))
+        @if (isset($product['id']) && ! empty($product['reviews']))
             <div class="mt-3 flex items-center gap-2">
                 <div class="flex gap-0.5">
                     @for ($i = 1; $i <= 5; $i++)

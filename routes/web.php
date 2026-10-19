@@ -58,6 +58,32 @@ Route::get('/about', [ShopController::class, 'about'])->name('about');
 Route::get('/contact', [ShopController::class, 'contact'])->name('contact');
 Route::post('/contact', [ShopController::class, 'contactSubmit'])->name('contact.submit');
 
+// Only stable, public URLs belong in the sitemap. Product records have an id;
+// id-less entries are the local sample catalogue used when the DB is unavailable.
+Route::get('/sitemap.xml', function () {
+    $products = collect(config('products', []))
+        ->filter(fn ($product) => isset($product['id'], $product['slug']));
+    $categorySlugs = collect(config('shop.categories', []))->pluck('slug');
+
+    $urls = collect([route('home'), route('products'), route('about'), route('contact')]);
+    foreach ($categorySlugs as $slug) {
+        if ($products->contains(fn ($product) => ($product['category'] ?? null) === $slug)) {
+            $urls->push(route('products', ['category' => $slug]));
+        }
+    }
+    foreach ($products as $product) {
+        if ($categorySlugs->contains($product['category'] ?? null)) {
+            $urls->push(route('product.show', ['product' => $product['slug']]));
+        }
+    }
+
+    $entries = $urls->unique()->map(fn ($url) => '<url><loc>'.htmlspecialchars($url, ENT_XML1 | ENT_QUOTES, 'UTF-8').'</loc></url>')->implode('');
+    $xml = '<?xml version="1.0" encoding="UTF-8"?>'
+        .'<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'.$entries.'</urlset>';
+
+    return response($xml, 200)->header('Content-Type', 'application/xml; charset=UTF-8');
+})->withoutMiddleware($stateless)->name('sitemap');
+
 // Guest pages.
 Route::middleware('guest')->group(function () {
     Route::view('/register', 'auth.register')->name('register');

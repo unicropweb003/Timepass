@@ -157,29 +157,8 @@ class ShopController extends Controller
             ],
         ];
 
-        // Customer reviews for the "What our customers say" section. These are now
-        // managed from the admin panel (Reviews). The sample reviews below are only a
-        // fallback shown when no reviews exist in the database yet.
-        $reviews = [
-            [
-                'name' => 'Anjali Mehta',
-                'tagline' => 'Skin care lover',
-                'rating' => 5,
-                'text' => 'The Vitamin C serum has made my skin look brighter in just a few weeks. It feels light, absorbs quickly and works well under makeup.',
-            ],
-            [
-                'name' => 'Rohan Verma',
-                'tagline' => 'Hair care fan',
-                'rating' => 4,
-                'text' => 'The keratin shampoo leaves my hair soft and much less frizzy. Delivery was quick and the products were packed nicely.',
-            ],
-        ];
-
-        // Active reviews come from the cached storefront data (no query per page
-        // view). If the table is empty or not migrated, the samples above stay.
-        if ($dbReviews = ShopData::reviews()) {
-            $reviews = $dbReviews;
-        }
+        // Display only reviews stored and enabled through the admin panel.
+        $reviews = ShopData::reviews();
 
         return view('home', compact('offer', 'promos', 'bestSellers', 'recommended', 'reels', 'reviews', 'wideBanners', 'dualBanners'));
     }

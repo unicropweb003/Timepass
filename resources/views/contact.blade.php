@@ -1,4 +1,4 @@
-@extends('layouts.app', ['title' => 'Contact'])
+@extends('layouts.app', ['seo' => \App\Support\Seo::contact()])
 
 @section('content')
 @php
@@ -16,7 +16,7 @@
         <span class="inline-flex items-center rounded-full bg-indigo-50 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-indigo-600">
             Get in touch
         </span>
-        <h1 class="mt-4 text-4xl font-bold tracking-tight text-gray-900">Contact us</h1>
+        <h1 class="mt-4 text-4xl font-bold tracking-tight text-gray-900">Contact TimePass</h1>
         <p class="mx-auto mt-3 max-w-xl text-gray-600">
             Have a question about an order, a product or anything else? Send us a message
             and our team will get back to you as soon as possible.
@@ -218,4 +218,18 @@
         </div>
     </div>
 </div>
+
+<section class="mx-auto mt-12 max-w-5xl" aria-labelledby="faq-heading">
+    <h2 id="faq-heading" class="text-2xl font-bold text-gray-900">Frequently asked questions</h2>
+    <div class="mt-4 space-y-3">
+        <details class="rounded-xl border border-gray-200 bg-white p-5">
+            <summary class="cursor-pointer font-semibold text-gray-900">How can I ask about a product?</summary>
+            <p class="mt-3 text-gray-600">Use the contact form and include the product name in your message.</p>
+        </details>
+        <details class="rounded-xl border border-gray-200 bg-white p-5">
+            <summary class="cursor-pointer font-semibold text-gray-900">Where can I find product prices?</summary>
+            <p class="mt-3 text-gray-600">Open a product page from the catalog to see its current displayed price.</p>
+        </details>
+    </div>
+</section>
 @endsection

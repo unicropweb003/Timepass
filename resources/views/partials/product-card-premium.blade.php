@@ -64,13 +64,13 @@
                 <a href="{{ $url }}" class="transition hover:text-indigo-600">{{ $product['name'] }}</a>
             </h3>
 
-            @isset($product['rating'])
+            @if (isset($product['id']) && ! empty($product['reviews']))
                 <div class="mt-1.5 flex items-center gap-1 text-xs text-gray-500">
                     <span class="text-amber-400">★</span>
                     <span class="font-semibold text-gray-700">{{ number_format($product['rating'], 1) }}</span>
                     <span>({{ $product['reviews'] ?? 0 }})</span>
                 </div>
-            @endisset
+            @endif
 
             <div class="mt-auto flex items-end justify-between pt-3">
                 <div class="flex flex-col leading-tight">

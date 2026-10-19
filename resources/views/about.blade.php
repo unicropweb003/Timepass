@@ -1,4 +1,4 @@
-@extends('layouts.app', ['title' => 'About Us · TimePass'])
+@extends('layouts.app', ['seo' => \App\Support\Seo::about()])
 
 @section('content')
 @php
@@ -8,7 +8,7 @@
 
     // Editable via the MCP update_about_us tool; falls back to the default copy.
     $about = config('shop.about', []);
-    $aboutTitle = $about['title'] ?? 'Beauty essentials for your everyday self-care';
+    $aboutTitle = $about['title'] ?? 'About TimePass Beauty and Everyday Self-Care';
     $aboutContent = $about['content'] ?? 'Your one-stop beauty store for skin care, hair care, makeup, fragrances and more — trusted products at honest prices, so self-care feels simple and joyful.';
     $aboutImage = $about['image'] ?? null;
 

@@ -1,6 +1,6 @@
 @php
     $typeName = $type ? $category['types'][$type] : null;
-    $heading = $typeName ?? $category['name'] ?? $form['name'] ?? 'All products';
+    $heading = $typeName ?? ($category ? $category['name'] . ' Products' : ($form['name'] ?? 'Beauty & Personal Care Products'));
     $description = match (true) {
         (bool) $typeName => $typeName . ' from our ' . $category['name'] . ' range' . ($form ? ' · Form: ' . $form['name'] : '') . '.',
         (bool) $category => $category['description'] . '.',
@@ -32,7 +32,7 @@
     $count = 'ml-auto rounded-full px-2 py-0.5 text-xs font-medium';
 @endphp
 
-@extends('layouts.app', ['title' => $heading . ($category && $typeName ? ' - ' . $category['name'] : ' - Products')])
+@extends('layouts.app', ['seo' => \App\Support\Seo::catalog($category, $type, $form, $minPrice, $maxPrice, $products)])
 
 @section('content')
 <div class="mb-6">

@@ -1,10 +1,23 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    @php
+        $seo = $seo ?? \App\Support\Seo::privatePage($title ?? 'TimePass');
+    @endphp
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>{{ $title ?? 'TimePass Store' }}</title>
+    <title>{{ $seo['title'] }}</title>
+    @isset($seo['description'])
+        <meta name="description" content="{{ $seo['description'] }}">
+    @endisset
+    <meta name="robots" content="{{ $seo['robots'] ?? 'index,follow' }}">
+    @isset($seo['canonical'])
+        <link rel="canonical" href="{{ $seo['canonical'] }}">
+    @endisset
+    @if (! empty($seo['schema']))
+        <script type="application/ld+json">{!! json_encode(['@'.'context' => 'https://schema.org', '@'.'graph' => $seo['schema']], JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) !!}</script>
+    @endif
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;0,800;1,500&display=swap" rel="stylesheet">

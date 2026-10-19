@@ -1,2 +1,4 @@
 User-agent: *
 Disallow:
+
+Sitemap: https://timepass-al0s.onrender.com/sitemap.xml

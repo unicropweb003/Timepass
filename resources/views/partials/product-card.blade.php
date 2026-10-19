@@ -35,10 +35,12 @@
                 @endif
             </p>
         @endisset
-        <span class="mt-4 inline-flex w-fit items-center gap-1 rounded-full bg-indigo-50 px-3 py-1 text-sm font-semibold text-indigo-700 ring-1 ring-indigo-100">
-            {{ number_format($product['rating'], 1) }}<span class="text-amber-500">★</span>
-            <span class="font-medium text-indigo-600/80">({{ $product['reviews'] }})</span>
-        </span>
+        @if (isset($product['id']) && ! empty($product['reviews']))
+            <span class="mt-4 inline-flex w-fit items-center gap-1 rounded-full bg-indigo-50 px-3 py-1 text-sm font-semibold text-indigo-700 ring-1 ring-indigo-100">
+                {{ number_format($product['rating'], 1) }}<span class="text-amber-500">★</span>
+                <span class="font-medium text-indigo-600/80">({{ $product['reviews'] }})</span>
+            </span>
+        @endif
 
         <div class="mt-auto grid grid-cols-2 gap-3 pt-6">
             <a href="{{ $url }}"

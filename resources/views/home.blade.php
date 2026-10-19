@@ -1,4 +1,4 @@
-@extends('layouts.app', ['title' => 'Home'])
+@extends('layouts.app', ['seo' => \App\Support\Seo::home()])
 
 @section('content')
 {{-- Enable scroll-reveal only when JS runs, so content stays visible without it. --}}
@@ -56,7 +56,7 @@
                 <span class="h-px w-7 bg-indigo-400"></span> TimePass Beauty
             </span>
             <h1 class="font-display mt-6 text-[2.5rem] font-bold leading-[1.08] tracking-tight text-gray-900 sm:text-5xl lg:text-[3.5rem]">
-                Beauty that feels<br>effortlessly <em class="not-italic text-indigo-600">you</em>.
+                Beauty &amp; personal care<br>made for <em class="not-italic text-indigo-600">you</em>.
             </h1>
             <p class="mt-5 max-w-md text-base leading-relaxed text-gray-600">
                 A refined edit of skin care, hair care, makeup and fragrance — chosen with care, priced with honesty.
@@ -82,7 +82,7 @@
         {{-- Classic arch-framed image (swap for a real product photo later) --}}
         <div class="relative mx-auto w-full max-w-xs sm:max-w-sm lg:max-w-none">
             <div class="relative mx-auto aspect-[4/5] w-full overflow-hidden rounded-t-[11rem] rounded-b-[2rem] shadow-xl ring-1 ring-black/5">
-                <img src="{{ asset('images/promos/skincare-kit.jpg') }}" alt="A curated beauty selection"
+                <img src="{{ asset('images/promos/skincare-kit.jpg') }}" alt="Cleanser, treatment bottle and moisturizer in a skin care kit"
                      onerror="this.style.display='none';this.parentElement.classList.add('bg-gradient-to-br','from-indigo-400','via-purple-400','to-pink-400')"
                      class="h-full w-full object-cover">
             </div>
@@ -337,6 +337,7 @@
 </section>
 
 {{-- ============================ REVIEWS ============================ --}}
+@if ($reviews)
 <section data-reveal class="mt-20" aria-labelledby="reviews-title">
     <div class="text-center">
         <h2 id="reviews-title" class="font-display text-3xl font-bold text-gray-900 sm:text-4xl">What our customers say</h2>
@@ -362,6 +363,7 @@
         @endforeach
     </div>
 </section>
+@endif
 
 {{-- ============================ FINAL CTA ============================ --}}
 <section data-reveal class="relative mt-20 overflow-hidden rounded-[2rem] bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-500 px-6 py-14 text-center text-white shadow-2xl shadow-purple-500/25 sm:px-12 sm:py-16">
