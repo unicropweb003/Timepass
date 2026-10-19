@@ -27,18 +27,48 @@
         [data-tilt-card] { transform: none !important; }
     }
 
-    /* TimePass promo card animations: start */
-    #promos .tp-promo-card { transition: transform .35s ease-out; }
-    #promos .tp-promo-card:is(:hover, :focus-visible, :active) { transform: translateY(-7px); }
+    /* TimePass promo card layout and CSS-only animations: start */
+    #promos .tp-promo-card {
+        --promo-tilt: -5deg;
+        background: #0b70d9; color: #fff;
+        transform: rotate(var(--promo-tilt));
+        transition: transform .35s ease-out;
+    }
+    #promos .tp-promo-card--toothpaste { --promo-tilt: -2.5deg; background: #07845f; }
+    #promos .tp-promo-card--hydration { --promo-tilt: 3deg; background: #fff; color: #111827; }
+    #promos .tp-promo-card--hair { --promo-tilt: 5deg; background: #fffdf8; color: #111827; }
+    #promos .tp-promo-card:is(:hover, :focus-visible, :active) { transform: translateY(-8px) rotate(0deg); }
     #promos .tp-promo-card:focus-visible { outline: 3px solid #4f46e5; outline-offset: 4px; }
+    #promos .tp-promo-copy { min-height: 9.25rem; }
+    #promos .tp-promo-eyebrow { color: rgba(255,255,255,.9); }
+    #promos .tp-promo-tagline { color: rgba(255,255,255,.9); }
+    #promos .tp-promo-card--hydration .tp-promo-eyebrow { color: #9a3412; }
+    #promos .tp-promo-card--hair .tp-promo-eyebrow { color: #78350f; }
+    #promos .tp-promo-card--hydration .tp-promo-tagline,
+    #promos .tp-promo-card--hair .tp-promo-tagline { color: #4b5563; }
+    #promos .tp-promo-photo { background: rgba(255,255,255,.18); }
+    #promos .tp-promo-image { object-position: center 75%; }
     #promos .tp-promo-visual { transition: transform .55s ease-out; }
     #promos .tp-promo-card:is(:hover, :focus-visible, :active) .tp-promo-visual { transform: scale(1.05); }
     #promos .tp-promo-arrow { transition: transform .35s ease-out; }
     #promos .tp-promo-card:is(:hover, :focus-visible, :active) .tp-promo-arrow { transform: translateX(5px); }
 
+    @media (max-width: 1023px) {
+        #promos .tp-promo-card { --promo-tilt: -2deg; }
+        #promos .tp-promo-card--toothpaste { --promo-tilt: 2deg; }
+        #promos .tp-promo-card--hydration { --promo-tilt: -2deg; }
+        #promos .tp-promo-card--hair { --promo-tilt: 2deg; }
+    }
+    @media (max-width: 639px) {
+        #promos .tp-promo-card { --promo-tilt: -1.5deg; }
+        #promos .tp-promo-card--toothpaste,
+        #promos .tp-promo-card--hair { --promo-tilt: 1.5deg; }
+        #promos .tp-promo-card--hydration { --promo-tilt: -1.5deg; }
+    }
+
     /* The products share one photo, so three soft reveals pass over their positions in order. */
     #promos .tp-promo-skin-glow {
-        position: absolute; bottom: 3%; width: 25%; height: 59%; border-radius: 50%;
+        position: absolute; bottom: 2%; width: 25%; height: 82%; border-radius: 50%;
         background: radial-gradient(ellipse, rgba(255,255,255,.7) 0%, rgba(245,239,255,.36) 40%, rgba(255,255,255,0) 76%);
         opacity: 0; animation: tp-promo-skin-pass 7.5s ease-in-out infinite;
     }
@@ -55,7 +85,7 @@
         animation: tp-promo-tooth-float 5.6s ease-in-out infinite;
     }
     #promos .tp-promo-mint-glow {
-        position: absolute; bottom: 8%; width: 24%; height: 55%; border-radius: 50%;
+        position: absolute; bottom: 4%; width: 24%; height: 82%; border-radius: 50%;
         background: radial-gradient(ellipse, rgba(225,255,238,.48), rgba(219,255,233,0) 76%);
         opacity: .18; animation: tp-promo-mint-float 5.6s ease-in-out infinite;
     }
@@ -103,7 +133,7 @@
     }
 
     #promos .tp-promo-shine {
-        position: absolute; top: 36%; left: -60%; width: 43%; height: 65%;
+        position: absolute; top: 13%; left: -60%; width: 43%; height: 87%;
         background: linear-gradient(90deg, rgba(255,255,255,0), rgba(255,255,255,.48), rgba(255,255,255,0));
         opacity: 0; animation: tp-promo-shine 7s ease-in-out infinite;
     }
@@ -128,13 +158,14 @@
 
     @media (prefers-reduced-motion: reduce) {
         #promos .tp-promo-card, #promos .tp-promo-visual, #promos .tp-promo-arrow { transition: none; }
+        #promos .tp-promo-card { transform: none; }
         #promos .tp-promo-card:is(:hover, :focus-visible, :active),
         #promos .tp-promo-card:is(:hover, :focus-visible, :active) .tp-promo-visual,
         #promos .tp-promo-card:is(:hover, :focus-visible, :active) .tp-promo-arrow { transform: none; }
         #promos .tp-promo-image, #promos .tp-promo-decoration > span { animation: none !important; }
         #promos .tp-promo-decoration > span { opacity: 0 !important; }
     }
-    /* TimePass promo card animations: end */
+    /* TimePass promo card layout and CSS-only animations: end */
 </style>
 
 @php
@@ -421,46 +452,46 @@
 
 {{-- ============================ PROMO TILES ============================ --}}
 <section id="promos" data-reveal class="mt-20 scroll-mt-28" aria-label="Featured products">
-    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6 lg:grid-cols-4">
+    <div class="grid grid-cols-1 gap-9 px-3 py-6 sm:grid-cols-2 sm:gap-x-10 sm:gap-y-12 sm:px-4 lg:grid-cols-4 lg:gap-10 lg:px-2">
         @foreach ($promos as $i => $promo)
-            <div data-reveal style="transition-delay: {{ $i * 70 }}ms">
+            <div data-reveal class="mx-auto w-full max-w-[26rem] sm:max-w-none" style="transition-delay: {{ $i * 70 }}ms">
                 <a href="{{ route('products', array_filter(['category' => $promo['category'], 'type' => $promo['type'] ?? null])) }}"
-                    class="tp-promo-card group relative block aspect-[8/11] overflow-hidden rounded-2xl bg-gray-100 shadow-sm ring-1 ring-gray-900/5 {{ $i === 1 ? 'tp-promo-card--toothpaste' : '' }} {{ $i === 2 ? 'tp-promo-card--hydration' : '' }}">
-                    <span class="tp-promo-visual absolute inset-0 overflow-hidden">
-                        <img src="{{ asset($promo['image']) }}" width="800" height="1100"
-                            onerror="this.onerror=null;this.src='{{ asset('images/no-image.svg') }}';"
-                            alt="{{ $promo['alt'] }}" loading="lazy"
-                            class="tp-promo-image absolute inset-0 h-full w-full object-cover">
-                    </span>
-                    @if ($i === 0)
-                        <span class="tp-promo-decoration pointer-events-none absolute inset-0" aria-hidden="true">
-                            <span class="tp-promo-skin-glow"></span><span class="tp-promo-skin-glow"></span><span class="tp-promo-skin-glow"></span>
-                        </span>
-                    @elseif ($i === 1)
-                        <span class="tp-promo-decoration pointer-events-none absolute inset-0" aria-hidden="true">
-                            <span class="tp-promo-mint-glow"></span><span class="tp-promo-mint-glow"></span><span class="tp-promo-mint-glow"></span>
-                            <span class="tp-promo-sparkle"></span><span class="tp-promo-sparkle"></span><span class="tp-promo-sparkle"></span>
-                        </span>
-                    @elseif ($i === 2)
-                        <span class="tp-promo-decoration pointer-events-none absolute inset-0" aria-hidden="true">
-                            <span class="tp-promo-ripple"></span><span class="tp-promo-ripple"></span>
-                        </span>
-                    @elseif ($i === 3)
-                        <span class="tp-promo-decoration pointer-events-none absolute inset-0" aria-hidden="true">
-                            <span class="tp-promo-shine"></span><span class="tp-promo-bubble"></span><span class="tp-promo-bubble"></span><span class="tp-promo-bubble"></span>
-                        </span>
-                    @endif
-                    <div class="pointer-events-none absolute inset-x-0 top-0 h-3/5"
-                        style="background: linear-gradient(to bottom, {{ $promo['tint'] }}cc 0%, {{ $promo['tint'] }}80 30%, {{ $promo['tint'] }}00 55%)"></div>
-                    <div class="relative max-w-[64%] p-3 sm:p-5">
-                        <p class="text-[10px] font-bold uppercase tracking-[0.15em] sm:text-[11px]" style="color: {{ $promo['accent'] }}">{{ $promo['eyebrow'] }}</p>
-                        <h3 class="mt-1 text-sm/tight font-black text-gray-900 sm:text-xl/tight lg:text-lg/tight xl:text-xl/tight">{{ $promo['title'] }}</h3>
-                        <p class="mt-1.5 text-xs leading-snug text-gray-700">{{ $promo['tagline'] }}</p>
+                    class="tp-promo-card group relative flex aspect-[2/3] flex-col rounded-[2rem] p-4 shadow-xl ring-1 ring-gray-900/5 sm:aspect-[8/11] sm:p-5 {{ $i === 1 ? 'tp-promo-card--toothpaste' : '' }} {{ $i === 2 ? 'tp-promo-card--hydration' : '' }} {{ $i === 3 ? 'tp-promo-card--hair' : '' }}">
+                    <div class="tp-promo-copy relative z-10 pb-3">
+                        <p class="tp-promo-eyebrow text-[10px] font-bold uppercase tracking-[0.15em] sm:text-[11px]">{{ $promo['eyebrow'] }}</p>
+                        <h3 class="mt-1 text-xl/tight font-black xl:text-2xl/tight">{{ $promo['title'] }}</h3>
+                        <p class="tp-promo-tagline mt-2 text-xs leading-snug sm:text-[11px] xl:text-xs">{{ $promo['tagline'] }}</p>
                     </div>
-                    <span class="absolute bottom-2.5 right-2.5 inline-flex items-center gap-1 rounded-full bg-white/90 px-2.5 py-1 text-[10px] font-semibold text-gray-900 shadow-sm ring-1 ring-gray-900/5 backdrop-blur sm:bottom-4 sm:right-4 sm:px-3 sm:py-1.5 sm:text-xs">
-                        Shop now
-                        <svg class="tp-promo-arrow h-3 w-3 sm:h-3.5 sm:w-3.5" fill="none" viewBox="0 0 24 24" stroke-width="2.2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3"/></svg>
-                    </span>
+                    <div class="tp-promo-photo relative min-h-0 flex-1 overflow-hidden rounded-[1.5rem]">
+                        <span class="tp-promo-visual absolute inset-0 overflow-hidden">
+                            <img src="{{ asset($promo['image']) }}" width="800" height="1100"
+                                onerror="this.onerror=null;this.src='{{ asset('images/no-image.svg') }}';"
+                                alt="{{ $promo['alt'] }}" loading="lazy"
+                                class="tp-promo-image absolute inset-0 h-full w-full object-cover">
+                        </span>
+                        @if ($i === 0)
+                            <span class="tp-promo-decoration pointer-events-none absolute inset-0" aria-hidden="true">
+                                <span class="tp-promo-skin-glow"></span><span class="tp-promo-skin-glow"></span><span class="tp-promo-skin-glow"></span>
+                            </span>
+                        @elseif ($i === 1)
+                            <span class="tp-promo-decoration pointer-events-none absolute inset-0" aria-hidden="true">
+                                <span class="tp-promo-mint-glow"></span><span class="tp-promo-mint-glow"></span><span class="tp-promo-mint-glow"></span>
+                                <span class="tp-promo-sparkle"></span><span class="tp-promo-sparkle"></span><span class="tp-promo-sparkle"></span>
+                            </span>
+                        @elseif ($i === 2)
+                            <span class="tp-promo-decoration pointer-events-none absolute inset-0" aria-hidden="true">
+                                <span class="tp-promo-ripple"></span><span class="tp-promo-ripple"></span>
+                            </span>
+                        @elseif ($i === 3)
+                            <span class="tp-promo-decoration pointer-events-none absolute inset-0" aria-hidden="true">
+                                <span class="tp-promo-shine"></span><span class="tp-promo-bubble"></span><span class="tp-promo-bubble"></span><span class="tp-promo-bubble"></span>
+                            </span>
+                        @endif
+                        <span class="absolute bottom-3 right-3 inline-flex items-center gap-1 rounded-full bg-white/90 px-2.5 py-1 text-[10px] font-semibold text-gray-900 shadow-sm ring-1 ring-gray-900/5 backdrop-blur sm:px-3 sm:py-1.5 sm:text-xs">
+                            Shop now
+                            <svg class="tp-promo-arrow h-3 w-3 sm:h-3.5 sm:w-3.5" fill="none" viewBox="0 0 24 24" stroke-width="2.2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3"/></svg>
+                        </span>
+                    </div>
                 </a>
             </div>
         @endforeach
