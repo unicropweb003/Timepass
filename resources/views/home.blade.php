@@ -26,6 +26,109 @@
         .js-reveal [data-reveal] { opacity: 1 !important; transform: none !important; transition: none; }
         [data-tilt-card] { transform: none !important; }
     }
+
+    /* TimePass promo card animations: start */
+    #promos .tp-promo-card { transition: transform .35s ease-out; }
+    #promos .tp-promo-card:is(:hover, :focus-visible, :active) { transform: translateY(-5px); }
+    #promos .tp-promo-card:focus-visible { outline: 3px solid #4f46e5; outline-offset: 4px; }
+    #promos .tp-promo-visual { transition: transform .55s ease-out; }
+    #promos .tp-promo-card:is(:hover, :focus-visible, :active) .tp-promo-visual { transform: scale(1.025); }
+    #promos .tp-promo-arrow { transition: transform .35s ease-out; }
+    #promos .tp-promo-card:is(:hover, :focus-visible, :active) .tp-promo-arrow { transform: translateX(3px); }
+
+    /* The photos are single JPGs: light passes over each product area in sequence. */
+    #promos .tp-promo-skin-glow {
+        position: absolute; bottom: 7%; width: 27%; height: 48%; border-radius: 50%;
+        background: radial-gradient(ellipse, rgba(255,255,255,.35) 0%, rgba(255,255,255,0) 70%);
+        opacity: 0; animation: tp-promo-skin-pass 9s ease-in-out infinite;
+    }
+    #promos .tp-promo-skin-glow:nth-child(1) { left: 2%; }
+    #promos .tp-promo-skin-glow:nth-child(2) { left: 29%; animation-delay: 3s; }
+    #promos .tp-promo-skin-glow:nth-child(3) { left: 56%; animation-delay: 6s; }
+    @keyframes tp-promo-skin-pass {
+        0%, 11%, 32%, 100% { opacity: 0; transform: translateY(5px); }
+        18%, 25% { opacity: .8; transform: translateY(-4px); }
+    }
+
+    /* Localized mint glints give each printed toothpaste tube its own gentle rhythm. */
+    #promos .tp-promo-mint-glow {
+        position: absolute; bottom: 11%; width: 13%; height: 39%; border-radius: 50%;
+        background: radial-gradient(ellipse, rgba(219,255,233,.33), rgba(219,255,233,0) 75%);
+        opacity: .15; animation: tp-promo-mint-float 7s ease-in-out infinite;
+    }
+    #promos .tp-promo-mint-glow:nth-child(1) { left: 23%; }
+    #promos .tp-promo-mint-glow:nth-child(2) { left: 45%; animation-delay: -2.2s; }
+    #promos .tp-promo-mint-glow:nth-child(3) { left: 68%; animation-delay: -4.4s; }
+    #promos .tp-promo-sparkle {
+        position: absolute; width: 5px; height: 5px; border-radius: 50%;
+        background: rgba(235,255,244,.9); opacity: 0;
+        animation: tp-promo-sparkle 6s ease-in-out infinite;
+    }
+    #promos .tp-promo-sparkle:nth-child(4) { left: 20%; top: 55%; }
+    #promos .tp-promo-sparkle:nth-child(5) { left: 55%; top: 48%; animation-delay: -2s; }
+    #promos .tp-promo-sparkle:nth-child(6) { left: 78%; top: 61%; animation-delay: -4s; }
+    @keyframes tp-promo-mint-float {
+        0%, 100% { opacity: .12; transform: translateY(3px); }
+        50% { opacity: .55; transform: translateY(-6px); }
+    }
+    @keyframes tp-promo-sparkle {
+        0%, 35%, 100% { opacity: 0; transform: scale(.7); }
+        55%, 70% { opacity: .7; transform: scale(1); }
+    }
+
+    #promos .tp-promo-card--hydration .tp-promo-image {
+        animation: tp-promo-hydration-zoom 14s ease-in-out infinite;
+    }
+    #promos .tp-promo-ripple {
+        position: absolute; left: 24%; bottom: 8%; width: 52%; height: 13%;
+        border: 1px solid rgba(255,255,255,.53); border-radius: 50%; opacity: 0;
+        animation: tp-promo-ripple 9s ease-out infinite;
+    }
+    #promos .tp-promo-ripple:nth-child(2) { animation-delay: -4.5s; }
+    @keyframes tp-promo-hydration-zoom {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.06); }
+    }
+    @keyframes tp-promo-ripple {
+        0% { opacity: 0; transform: scale(.75); }
+        25% { opacity: .42; }
+        65%, 100% { opacity: 0; transform: scale(1.4); }
+    }
+
+    #promos .tp-promo-shine {
+        position: absolute; top: 39%; left: -55%; width: 37%; height: 65%;
+        background: linear-gradient(90deg, rgba(255,255,255,0), rgba(255,255,255,.26), rgba(255,255,255,0));
+        opacity: 0; animation: tp-promo-shine 9s ease-in-out infinite;
+    }
+    #promos .tp-promo-bubble {
+        position: absolute; bottom: 8%; width: 8px; height: 8px; border: 1px solid rgba(255,255,255,.8);
+        border-radius: 50%; background: rgba(255,255,255,.16); opacity: 0;
+        animation: tp-promo-bubble 8s ease-in-out infinite;
+    }
+    #promos .tp-promo-bubble:nth-child(2) { left: 31%; animation-delay: -2s; }
+    #promos .tp-promo-bubble:nth-child(3) { left: 57%; width: 5px; height: 5px; animation-delay: -4s; }
+    #promos .tp-promo-bubble:nth-child(4) { left: 72%; width: 6px; height: 6px; animation-delay: -6s; }
+    @keyframes tp-promo-shine {
+        0%, 48% { opacity: 0; transform: translateX(0) skewX(-16deg); }
+        55% { opacity: .55; }
+        77% { opacity: .55; }
+        84%, 100% { opacity: 0; transform: translateX(540%) skewX(-16deg); }
+    }
+    @keyframes tp-promo-bubble {
+        0%, 100% { opacity: 0; transform: translateY(0); }
+        25% { opacity: .65; }
+        75% { opacity: 0; transform: translateY(-25px); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        #promos .tp-promo-card, #promos .tp-promo-visual, #promos .tp-promo-arrow { transition: none; }
+        #promos .tp-promo-card:is(:hover, :focus-visible, :active),
+        #promos .tp-promo-card:is(:hover, :focus-visible, :active) .tp-promo-visual,
+        #promos .tp-promo-card:is(:hover, :focus-visible, :active) .tp-promo-arrow { transform: none; }
+        #promos .tp-promo-image, #promos .tp-promo-decoration > span { animation: none !important; }
+        #promos .tp-promo-decoration > span { opacity: 0 !important; }
+    }
+    /* TimePass promo card animations: end */
 </style>
 
 @php
@@ -312,26 +415,48 @@
 
 {{-- ============================ PROMO TILES ============================ --}}
 <section id="promos" data-reveal class="mt-20 scroll-mt-28" aria-label="Featured products">
-    <div class="grid grid-cols-2 gap-4 sm:gap-6 lg:grid-cols-4">
+    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6 lg:grid-cols-4">
         @foreach ($promos as $i => $promo)
-            <a href="{{ route('products', array_filter(['category' => $promo['category'], 'type' => $promo['type'] ?? null])) }}" data-reveal style="transition-delay: {{ $i * 70 }}ms"
-                class="group relative block aspect-[8/11] overflow-hidden rounded-2xl bg-gray-100 shadow-sm ring-1 ring-gray-900/5 transition duration-300 hover:-translate-y-1.5 hover:shadow-xl hover:shadow-indigo-500/15">
-                <img src="{{ asset($promo['image']) }}"
-                    onerror="this.onerror=null;this.src='{{ asset('images/no-image.svg') }}';"
-                    alt="{{ $promo['alt'] }}" loading="lazy"
-                    class="absolute inset-0 h-full w-full object-cover transition duration-500 group-hover:scale-110">
-                <div class="pointer-events-none absolute inset-x-0 top-0 h-3/5"
-                    style="background: linear-gradient(to bottom, {{ $promo['tint'] }}cc 0%, {{ $promo['tint'] }}80 30%, {{ $promo['tint'] }}00 55%)"></div>
-                <div class="relative max-w-[64%] p-3 sm:p-5">
-                    <p class="text-[10px] font-bold uppercase tracking-[0.15em] sm:text-[11px]" style="color: {{ $promo['accent'] }}">{{ $promo['eyebrow'] }}</p>
-                    <h3 class="mt-1 text-sm/tight font-black text-gray-900 sm:text-xl/tight lg:text-lg/tight xl:text-xl/tight">{{ $promo['title'] }}</h3>
-                    <p class="mt-1.5 hidden text-xs leading-snug text-gray-700 sm:block lg:hidden xl:block">{{ $promo['tagline'] }}</p>
-                </div>
-                <span class="absolute bottom-2.5 right-2.5 inline-flex items-center gap-1 rounded-full bg-white/90 px-2.5 py-1 text-[10px] font-semibold text-gray-900 shadow-sm ring-1 ring-gray-900/5 backdrop-blur transition group-hover:bg-white sm:bottom-4 sm:right-4 sm:px-3 sm:py-1.5 sm:text-xs">
-                    Shop now
-                    <svg class="h-3 w-3 transition-transform group-hover:translate-x-0.5 sm:h-3.5 sm:w-3.5" fill="none" viewBox="0 0 24 24" stroke-width="2.2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3"/></svg>
-                </span>
-            </a>
+            <div data-reveal style="transition-delay: {{ $i * 70 }}ms">
+                <a href="{{ route('products', array_filter(['category' => $promo['category'], 'type' => $promo['type'] ?? null])) }}"
+                    class="tp-promo-card group relative block aspect-[8/11] overflow-hidden rounded-2xl bg-gray-100 shadow-sm ring-1 ring-gray-900/5 {{ $i === 2 ? 'tp-promo-card--hydration' : '' }}">
+                    <span class="tp-promo-visual absolute inset-0 overflow-hidden">
+                        <img src="{{ asset($promo['image']) }}" width="800" height="1100"
+                            onerror="this.onerror=null;this.src='{{ asset('images/no-image.svg') }}';"
+                            alt="{{ $promo['alt'] }}" loading="lazy"
+                            class="tp-promo-image absolute inset-0 h-full w-full object-cover">
+                    </span>
+                    @if ($i === 0)
+                        <span class="tp-promo-decoration pointer-events-none absolute inset-0" aria-hidden="true">
+                            <span class="tp-promo-skin-glow"></span><span class="tp-promo-skin-glow"></span><span class="tp-promo-skin-glow"></span>
+                        </span>
+                    @elseif ($i === 1)
+                        <span class="tp-promo-decoration pointer-events-none absolute inset-0" aria-hidden="true">
+                            <span class="tp-promo-mint-glow"></span><span class="tp-promo-mint-glow"></span><span class="tp-promo-mint-glow"></span>
+                            <span class="tp-promo-sparkle"></span><span class="tp-promo-sparkle"></span><span class="tp-promo-sparkle"></span>
+                        </span>
+                    @elseif ($i === 2)
+                        <span class="tp-promo-decoration pointer-events-none absolute inset-0" aria-hidden="true">
+                            <span class="tp-promo-ripple"></span><span class="tp-promo-ripple"></span>
+                        </span>
+                    @elseif ($i === 3)
+                        <span class="tp-promo-decoration pointer-events-none absolute inset-0" aria-hidden="true">
+                            <span class="tp-promo-shine"></span><span class="tp-promo-bubble"></span><span class="tp-promo-bubble"></span><span class="tp-promo-bubble"></span>
+                        </span>
+                    @endif
+                    <div class="pointer-events-none absolute inset-x-0 top-0 h-3/5"
+                        style="background: linear-gradient(to bottom, {{ $promo['tint'] }}cc 0%, {{ $promo['tint'] }}80 30%, {{ $promo['tint'] }}00 55%)"></div>
+                    <div class="relative max-w-[64%] p-3 sm:p-5">
+                        <p class="text-[10px] font-bold uppercase tracking-[0.15em] sm:text-[11px]" style="color: {{ $promo['accent'] }}">{{ $promo['eyebrow'] }}</p>
+                        <h3 class="mt-1 text-sm/tight font-black text-gray-900 sm:text-xl/tight lg:text-lg/tight xl:text-xl/tight">{{ $promo['title'] }}</h3>
+                        <p class="mt-1.5 text-xs leading-snug text-gray-700">{{ $promo['tagline'] }}</p>
+                    </div>
+                    <span class="absolute bottom-2.5 right-2.5 inline-flex items-center gap-1 rounded-full bg-white/90 px-2.5 py-1 text-[10px] font-semibold text-gray-900 shadow-sm ring-1 ring-gray-900/5 backdrop-blur sm:bottom-4 sm:right-4 sm:px-3 sm:py-1.5 sm:text-xs">
+                        Shop now
+                        <svg class="tp-promo-arrow h-3 w-3 sm:h-3.5 sm:w-3.5" fill="none" viewBox="0 0 24 24" stroke-width="2.2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3"/></svg>
+                    </span>
+                </a>
+            </div>
         @endforeach
     </div>
 </section>
