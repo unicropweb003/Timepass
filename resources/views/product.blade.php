@@ -104,7 +104,7 @@
             </div>
         @endif
 
-        <p class="mt-4 line-clamp-3 text-gray-600 leading-relaxed">{{ $product['description'] }}</p>
+        <p class="mt-4 text-gray-600 leading-relaxed">{{ $product['description'] }}</p>
 
         {{-- Price panel --}}
         <div class="mt-6 rounded-2xl border border-gray-100 bg-gray-50/70 p-5">
@@ -163,26 +163,104 @@
         ['Form', $formName, 'M9.75 3.104v5.714a2.25 2.25 0 0 1-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 0 1 4.5 0m0 0v5.714c0 .597.237 1.17.659 1.591L19.8 15.3M14.25 3.104c.251.023.501.05.75.082M19.8 15.3l-1.57.393A9.065 9.065 0 0 1 12 15a9.065 9.065 0 0 0-6.23-.693L5 14.5m14.8.8 1.402 1.402c1.232 1.232.65 3.318-1.067 3.611A48.309 48.309 0 0 1 12 21c-2.773 0-5.491-.235-8.135-.687-1.718-.293-2.3-2.379-1.067-3.61L5 14.5'],
         ['Price', '₹' . number_format($product['price']), 'M12 6v12m-3-2.818.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z'],
     ], fn ($s) => ! empty($s[1])));
+
+    // Keep the admin's plain-text details intact while giving headings, lists and steps proper structure.
+    $detailText = trim((string) (($product['details'] ?? null) ?: ($product['description'] ?: 'No description available for this product yet.')));
+    $detailSections = [];
+    $section = ['title' => 'Overview', 'blocks' => []];
+    $block = null;
+    $flushBlock = function () use (&$block, &$section): void {
+        if ($block !== null) {
+            $section['blocks'][] = $block;
+            $block = null;
+        }
+    };
+    $flushSection = function () use (&$section, &$detailSections, $flushBlock): void {
+        $flushBlock();
+        if ($section['blocks'] !== []) {
+            $detailSections[] = $section;
+        }
+    };
+
+    foreach (preg_split('/\R/u', $detailText) ?: [] as $rawLine) {
+        $line = trim($rawLine);
+        if ($line === '') {
+            $flushBlock();
+            continue;
+        }
+
+        if (preg_match('/^[\p{Lu}\d][\p{Lu}\p{N}\s&\/(),+:.\-]{2,80}$/u', $line)) {
+            $flushSection();
+            $section = ['title' => rtrim($line, ':'), 'blocks' => []];
+            continue;
+        }
+
+        if (preg_match('/^[•\-*]\s+(.+)$/u', $line, $match)) {
+            $kind = 'bullet';
+            $value = $match[1];
+        } elseif (preg_match('/^(\d+)[.)]\s+(.+)$/u', $line, $match)) {
+            $kind = 'step';
+            $value = ['number' => $match[1], 'text' => $match[2]];
+        } else {
+            $kind = 'paragraph';
+            $value = $line;
+        }
+
+        if ($block === null || $block['kind'] !== $kind) {
+            $flushBlock();
+            $block = ['kind' => $kind, 'items' => []];
+        }
+        $block['items'][] = $value;
+    }
+    $flushSection();
 @endphp
-<section class="pd-reveal mt-12 max-w-5xl">
+<section class="pd-reveal mt-12">
     <details open class="group overflow-hidden rounded-3xl border border-gray-200 bg-white shadow-sm">
         <summary class="flex cursor-pointer items-center gap-4 px-6 py-5 [&::-webkit-details-marker]:hidden sm:px-8">
             <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-white shadow-md" style="background-image: {{ $grad }}">
                 <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09Z"/></svg>
             </span>
             <span class="min-w-0 flex-1">
-                <span class="font-display block text-lg font-bold text-gray-900 sm:text-xl">The good stuff inside</span>
-                <span class="block text-xs text-gray-400">Full description, details &amp; specs</span>
+                <span class="font-display block text-lg font-bold text-gray-900 sm:text-xl">Product details</span>
+                <span class="block text-xs text-gray-500">Benefits, ingredients, directions and specifications</span>
             </span>
             <svg class="h-6 w-6 shrink-0 text-gray-400 transition-transform duration-300 group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m19 9-7 7-7-7"/></svg>
         </summary>
-        <div class="border-t border-gray-100 px-6 py-7 sm:px-8">
-            {{-- Overview: clean, airy typography --}}
-            <p class="text-[11px] font-semibold uppercase tracking-[0.18em]" style="color: {{ $c2 }}">Overview</p>
-            <p class="mt-3 max-w-3xl whitespace-pre-line text-[15px] leading-7 text-gray-600">{{ ($product['details'] ?? null) ?: ($product['description'] ?: 'No description available for this product yet.') }}</p>
+        <div class="border-t border-gray-100 bg-gray-50/40 px-5 py-6 sm:px-8 sm:py-8">
+            <div class="grid gap-4 md:grid-cols-2 md:gap-5">
+                @foreach ($detailSections as $detailSection)
+                    @php
+                        $hasSteps = collect($detailSection['blocks'])->contains(fn ($detailBlock) => $detailBlock['kind'] === 'step');
+                        $isWide = $detailSection['title'] === 'Overview' || $hasSteps;
+                    @endphp
+                    <section class="min-w-0 rounded-2xl border border-gray-200/80 bg-white p-5 shadow-sm sm:p-6 {{ $isWide ? 'md:col-span-2' : '' }}">
+                        <h3 class="font-display text-lg font-bold leading-snug text-gray-900 sm:text-xl">{{ $detailSection['title'] }}</h3>
+                        <div class="mt-3 h-0.5 w-10 rounded-full" style="background-color: {{ $c1 }}"></div>
+                        <div class="mt-4 space-y-4 text-[15px] leading-7 text-gray-700">
+                            @foreach ($detailSection['blocks'] as $detailBlock)
+                                @if ($detailBlock['kind'] === 'bullet')
+                                    <ul class="space-y-2.5">
+                                        @foreach ($detailBlock['items'] as $item)
+                                            <li class="flex items-start gap-3"><span aria-hidden="true" class="mt-[11px] h-1.5 w-1.5 shrink-0 rounded-full" style="background-color: {{ $c1 }}"></span><span class="min-w-0">{{ $item }}</span></li>
+                                        @endforeach
+                                    </ul>
+                                @elseif ($detailBlock['kind'] === 'step')
+                                    <ol class="space-y-3">
+                                        @foreach ($detailBlock['items'] as $item)
+                                            <li class="flex items-start gap-3"><span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-bold" style="background-color: {{ $c1 }}1a; color: {{ $c2 }}">{{ $item['number'] }}</span><span class="min-w-0">{{ $item['text'] }}</span></li>
+                                        @endforeach
+                                    </ol>
+                                @else
+                                    <p>{{ implode(' ', $detailBlock['items']) }}</p>
+                                @endif
+                            @endforeach
+                        </div>
+                    </section>
+                @endforeach
+            </div>
 
             {{-- Specifications: modern strip with soft icons + subtle dividers --}}
-            <p class="mt-8 text-[11px] font-semibold uppercase tracking-[0.18em] text-gray-400">Specifications</p>
+            <h3 class="mt-8 font-display text-lg font-bold text-gray-900 sm:text-xl">Specifications</h3>
             <div class="mt-3 grid grid-cols-2 divide-x divide-y divide-gray-100 overflow-hidden rounded-2xl border border-gray-100 bg-white sm:grid-cols-4 sm:divide-y-0">
                 @foreach ($specs as [$label, $value, $icon])
                     <div class="flex flex-col items-center gap-2.5 p-5 text-center transition hover:bg-gray-50/70">
