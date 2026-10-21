@@ -37,7 +37,8 @@ class SeoTest extends TestCase
 
         $xml = simplexml_load_string($response->getContent());
         $this->assertNotFalse($xml);
-        $this->assertCount(6, $xml->url);
+        $this->assertCount(7, $xml->url);
+        $this->assertStringContainsString('/privacy-policy', $response->getContent());
         $this->assertStringContainsString('/product/test-serum', $response->getContent());
         $this->assertStringNotContainsString('fallback-only', $response->getContent());
         $this->assertStringNotContainsString('/search', $response->getContent());
@@ -105,7 +106,7 @@ class SeoTest extends TestCase
     public function test_public_landing_page_copy_stays_within_requested_lengths(): void
     {
         config(['products' => [$this->realProduct()]]);
-        $paths = ['/', '/products', '/about', '/contact'];
+        $paths = ['/', '/products', '/about', '/contact', '/privacy-policy'];
         foreach (config('shop.categories', []) as $category) {
             $paths[] = '/products?category='.$category['slug'];
         }

@@ -145,6 +145,15 @@ class Seo
         ];
     }
 
+    public static function privacy(): array
+    {
+        return [
+            'title' => 'Privacy Policy | TimePass Beauty Store Online in India',
+            'description' => 'Read how TimePass collects, uses and protects your personal data on our website and Android app, and how you can request deletion of your TimePass account.',
+            'canonical' => route('privacy'),
+        ];
+    }
+
     public static function contact(): array
     {
         return [

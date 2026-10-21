@@ -412,6 +412,7 @@
             'Help & Information' => [
                 ['About Us', route('about')],
                 ['Contact Us', route('contact')],
+                ['Privacy Policy', route('privacy')],
                 ['All Products', route('products')],
                 ['Search', route('search')],
             ],

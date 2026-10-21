@@ -20,6 +20,7 @@ class ContactMessage extends Model
         'Product question',
         'Returns and refunds',
         'Bulk or business enquiry',
+        'Privacy or account deletion',
         'Other',
     ];
 

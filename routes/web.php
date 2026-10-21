@@ -57,6 +57,8 @@ Route::get('/search', [ShopController::class, 'search'])->name('search');
 Route::get('/about', [ShopController::class, 'about'])->name('about');
 Route::get('/contact', [ShopController::class, 'contact'])->name('contact');
 Route::post('/contact', [ShopController::class, 'contactSubmit'])->name('contact.submit');
+// Linked from the Play Store listing; keep this URL stable.
+Route::view('/privacy-policy', 'privacy-policy')->name('privacy');
 
 // Only stable, public URLs belong in the sitemap. Product records have an id;
 // id-less entries are the local sample catalogue used when the DB is unavailable.
@@ -65,7 +67,7 @@ Route::get('/sitemap.xml', function () {
         ->filter(fn ($product) => isset($product['id'], $product['slug']));
     $categorySlugs = collect(config('shop.categories', []))->pluck('slug');
 
-    $urls = collect([route('home'), route('products'), route('about'), route('contact')]);
+    $urls = collect([route('home'), route('products'), route('about'), route('contact'), route('privacy')]);
     foreach ($categorySlugs as $slug) {
         if ($products->contains(fn ($product) => ($product['category'] ?? null) === $slug)) {
             $urls->push(route('products', ['category' => $slug]));

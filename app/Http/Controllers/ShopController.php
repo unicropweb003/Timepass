@@ -284,6 +284,7 @@ class ShopController extends Controller
             ['title' => 'Products', 'route' => 'products', 'description' => 'Browse our products page.'],
             ['title' => 'About', 'route' => 'about', 'description' => 'Learn more about TimePass.'],
             ['title' => 'Contact', 'route' => 'contact', 'description' => 'Get in touch with us.'],
+            ['title' => 'Privacy Policy', 'route' => 'privacy', 'description' => 'How we handle your personal data and account deletion.'],
         ];
 
         $results = $q === '' ? [] : array_values(array_filter($pages, function ($p) use ($q) {
