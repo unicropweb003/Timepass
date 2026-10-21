@@ -37,7 +37,8 @@
     $hasDiscount = ! empty($product['mrp']) && $product['mrp'] > $product['price'];
     $off = $hasDiscount ? round(100 - $product['price'] / $product['mrp'] * 100) : 0;
     $formName = collect(config('shop.forms', []))->firstWhere('slug', $product['form_slug'] ?? null)['name'] ?? null;
-    $buyUrl = route('contact', ['product' => $product['name']]);
+    $canBuy = isset($product['id']) && (! isset($product['stock']) || (int) $product['stock'] > 0);
+    $buyUrl = $canBuy ? route('checkout.show', $product['slug']) : null;
 @endphp
 
 {{-- Breadcrumb --}}
@@ -116,19 +117,29 @@
                 @endif
             </div>
             <p class="mt-1 text-xs text-gray-400">Inclusive of all taxes. Shipping calculated at checkout.</p>
-            <p class="mt-3 inline-flex items-center gap-2 text-sm font-semibold text-emerald-600">
-                <span class="h-2 w-2 rounded-full bg-emerald-500"></span> In stock · ready to ship
-            </p>
+            @if ($canBuy)
+                <p class="mt-3 inline-flex items-center gap-2 text-sm font-semibold text-emerald-600">
+                    <span class="h-2 w-2 rounded-full bg-emerald-500"></span> In stock · ready to ship
+                </p>
+            @else
+                <p class="mt-3 inline-flex items-center gap-2 text-sm font-semibold text-amber-700">
+                    <span class="h-2 w-2 rounded-full bg-amber-500"></span> Online purchase unavailable
+                </p>
+            @endif
         </div>
 
         {{-- Buy --}}
         <div class="mt-5">
+            @if ($canBuy)
             <a href="{{ $buyUrl }}"
                class="nav-shimmer group inline-flex w-full items-center justify-center gap-2 rounded-xl px-6 py-4 text-sm font-bold uppercase tracking-wider text-white shadow-lg transition hover:-translate-y-0.5 hover:shadow-xl" style="background-image: {{ $grad }}">
                 <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 0 0-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 0 0-16.536-1.84M7.5 14.25 5.106 5.272M6 20.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Zm12.75 0a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z"/></svg>
                 Buy now
                 <svg class="h-4 w-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke-width="2.2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3"/></svg>
             </a>
+            @else
+                <span class="inline-flex w-full items-center justify-center rounded-xl border border-gray-200 bg-gray-100 px-6 py-4 text-sm font-bold uppercase tracking-wider text-gray-500">Online purchase unavailable</span>
+            @endif
         </div>
 
         <div class="mt-3 grid gap-3 sm:grid-cols-2">

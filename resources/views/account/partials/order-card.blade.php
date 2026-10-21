@@ -8,7 +8,7 @@
     <div class="flex flex-wrap items-start justify-between gap-3">
         <div>
             <p class="font-semibold text-gray-900">Order #{{ $order->order_number }}</p>
-            <p class="mt-0.5 text-xs text-gray-500">Placed on {{ $order->created_at->format('d M Y') }} · {{ $itemCount }} {{ \Illuminate\Support\Str::plural('item', $itemCount) }}</p>
+            <p class="mt-0.5 text-xs text-gray-500">{{ $order->status === 'pending_payment' ? 'Started on' : 'Placed on' }} {{ $order->created_at->format('d M Y') }} · {{ $itemCount }} {{ \Illuminate\Support\Str::plural('item', $itemCount) }}</p>
         </div>
         <span class="rounded-full px-3 py-1 text-xs font-semibold ring-1 {{ $order->statusClasses() }}">{{ $order->statusLabel() }}</span>
     </div>

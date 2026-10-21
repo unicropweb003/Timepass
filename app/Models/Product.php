@@ -52,6 +52,7 @@ class Product extends Model
             'type' => $this->type,
             'form' => $this->form,
             'price' => (int) $this->price,
+            'stock' => $this->stock,
             'mrp' => $this->mrp !== null ? (int) $this->mrp : null,
             'description' => $this->description,
             'details' => $this->details,

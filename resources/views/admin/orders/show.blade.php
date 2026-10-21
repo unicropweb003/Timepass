@@ -57,6 +57,9 @@
     <div class="space-y-6">
         <div class="rounded-2xl border border-gray-200 bg-white p-6">
             <h2 class="font-semibold text-gray-900">Update status</h2>
+            @if ($order->payment_status === 'pending')
+                <p class="mt-3 rounded-lg bg-amber-50 p-3 text-sm text-amber-800">Payment is awaiting confirmation. Delivery status can be changed after Razorpay confirms the payment.</p>
+            @else
             <form method="POST" action="{{ route('admin.orders.status', $order) }}" class="mt-4 space-y-3">
                 @csrf @method('PATCH')
                 <select name="status" class="block w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40">
@@ -67,6 +70,7 @@
                 </select>
                 <button class="w-full rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-indigo-500">Save status</button>
             </form>
+            @endif
         </div>
 
         <div class="rounded-2xl border border-gray-200 bg-white p-6 text-sm">
@@ -83,6 +87,9 @@
             <p class="mt-1 text-gray-500">{{ $order->shipping_address }}</p>
             @if ($order->courier)<p class="mt-2 text-gray-500">Courier: {{ $order->courier }} {{ $order->tracking_number ? '('.$order->tracking_number.')' : '' }}</p>@endif
             <p class="mt-1 text-gray-500">Payment: {{ $order->payment_method }}</p>
+            @if ($order->payment_status)
+                <p class="mt-1 text-gray-500">Payment status: {{ ucfirst($order->payment_status) }}</p>
+            @endif
         </div>
     </div>
 </div>

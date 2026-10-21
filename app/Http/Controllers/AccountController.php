@@ -21,7 +21,7 @@ class AccountController extends Controller
         return view('account.index', [
             'recentOrders' => $user->orders()->withCount('items')->latest()->take(3)->get(),
             'orderCount' => $user->orders()->count(),
-            'activeCount' => $user->orders()->whereNotIn('status', ['delivered', 'cancelled'])->count(),
+            'activeCount' => $user->orders()->whereNotIn('status', ['pending_payment', 'delivered', 'cancelled'])->count(),
             'totalSpent' => $user->transactions()->where('type', 'payment')->where('status', 'success')->sum('amount'),
             'defaultAddress' => $user->addresses()->orderByDesc('is_default')->first(),
         ]);

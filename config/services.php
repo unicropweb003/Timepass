@@ -41,6 +41,12 @@ return [
         'redirect' => env('GOOGLE_REDIRECT_URI', '/admin/auth/google/callback'),
     ],
 
+    'razorpay' => [
+        'key_id' => env('RAZORPAY_KEY_ID'),
+        'key_secret' => env('RAZORPAY_KEY_SECRET'),
+        'webhook_secret' => env('RAZORPAY_WEBHOOK_SECRET'),
+    ],
+
     // Secret bearer token that protects the MCP server (set MCP_TOKEN in the
     // environment). AI clients must send: Authorization: Bearer <MCP_TOKEN>.
     'mcp' => [

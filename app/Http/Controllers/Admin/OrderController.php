@@ -20,7 +20,7 @@ class OrderController extends Controller
             ->latest()
             ->paginate(PerPage::from($request))->withQueryString();
 
-        $statuses = array_keys(Order::STEPS);
+        $statuses = ['pending_payment', ...array_keys(Order::STEPS)];
 
         return view('admin.orders.index', compact('orders', 'statuses'));
     }
@@ -38,6 +38,10 @@ class OrderController extends Controller
         $data = $request->validate([
             'status' => ['required', 'string', 'in:'.implode(',', [...array_keys(Order::STEPS), 'cancelled'])],
         ]);
+
+        if ($order->payment_status === 'pending') {
+            return back()->withErrors(['status' => 'Wait for the payment to be confirmed before changing this order.']);
+        }
 
         $order->status = $data['status'];
 

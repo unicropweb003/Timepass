@@ -5,6 +5,7 @@
     $url = $product['url'] ?? route('products');
     $hasOff = ! empty($product['mrp']) && $product['mrp'] > $product['price'];
     $off = $hasOff ? round(100 - $product['price'] / $product['mrp'] * 100) : 0;
+    $canBuy = isset($product['id']) && (! isset($product['stock']) || (int) $product['stock'] > 0);
 @endphp
 <article class="group flex h-full flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white transition duration-300 hover:-translate-y-1.5 hover:border-indigo-200 hover:shadow-xl hover:shadow-indigo-500/15">
     {{-- Image → detail page, with zoom + "View details" overlay on hover --}}
@@ -45,11 +46,15 @@
         <div class="mt-auto grid grid-cols-2 gap-3 pt-6">
             <a href="{{ $url }}"
                 class="rounded-lg border border-gray-300 py-2.5 text-center text-sm font-bold uppercase tracking-wider text-gray-800 transition hover:border-indigo-400 hover:bg-indigo-50 hover:text-indigo-600">Details</a>
-            <a href="{{ route('contact', ['product' => $product['name']]) }}"
+            @if ($canBuy)
+            <a href="{{ route('checkout.show', $product['slug']) }}"
                 class="inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-lg bg-gradient-to-r from-indigo-600 to-purple-600 py-2.5 text-sm font-bold uppercase tracking-wider text-white shadow-md shadow-indigo-500/20 transition hover:-translate-y-0.5 hover:shadow-lg">
                 <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 0 0-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 0 0-16.536-1.84M7.5 14.25 5.106 5.272M6 20.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Zm12.75 0a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z"/></svg>
                 Buy Now
             </a>
+            @else
+                <span class="inline-flex items-center justify-center rounded-lg border border-gray-200 bg-gray-100 py-2.5 text-center text-xs font-bold uppercase tracking-wider text-gray-500">Unavailable</span>
+            @endif
         </div>
     </div>
 </article>

@@ -13,6 +13,7 @@ use App\Http\Controllers\Admin\SettingController;
 use App\Http\Controllers\Admin\TransactionController;
 use App\Http\Controllers\Admin\WishlistController as AdminWishlistController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\McpUploadController;
 use App\Http\Controllers\MediaController;
 use App\Http\Controllers\ShopController;
@@ -59,6 +60,19 @@ Route::get('/contact', [ShopController::class, 'contact'])->name('contact');
 Route::post('/contact', [ShopController::class, 'contactSubmit'])->name('contact.submit');
 // Linked from the Play Store listing; keep this URL stable.
 Route::view('/privacy-policy', 'privacy-policy')->name('privacy');
+
+// Razorpay calls this endpoint directly. The raw signed body is verified by the controller.
+Route::post('/payments/razorpay/webhook', [CheckoutController::class, 'webhook'])
+    ->withoutMiddleware($stateless)
+    ->middleware('throttle:120,1')
+    ->name('payments.razorpay.webhook');
+
+Route::middleware('auth')->prefix('checkout')->name('checkout.')->controller(CheckoutController::class)->group(function () {
+    Route::get('/order/{orderNumber}', 'payment')->name('payment');
+    Route::post('/order/{orderNumber}/confirm', 'confirm')->name('confirm');
+    Route::get('/{product}', 'show')->name('show');
+    Route::post('/{product}', 'start')->name('start');
+});
 
 // Only stable, public URLs belong in the sitemap. Product records have an id;
 // id-less entries are the local sample catalogue used when the DB is unavailable.

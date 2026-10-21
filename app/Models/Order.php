@@ -21,6 +21,7 @@ class Order extends Model
 
     protected $fillable = [
         'order_number', 'status', 'subtotal', 'shipping', 'discount', 'total', 'payment_method',
+        'payment_status', 'gateway_order_id', 'paid_at',
         'shipping_name', 'shipping_phone', 'shipping_address', 'courier', 'tracking_number',
         'expected_delivery', 'packed_at', 'shipped_at', 'out_for_delivery_at', 'delivered_at', 'cancelled_at',
     ];
@@ -32,6 +33,7 @@ class Order extends Model
             'shipping' => 'decimal:2',
             'discount' => 'decimal:2',
             'total' => 'decimal:2',
+            'paid_at' => 'datetime',
             'expected_delivery' => 'date',
             'packed_at' => 'datetime',
             'shipped_at' => 'datetime',
@@ -63,7 +65,11 @@ class Order extends Model
 
     public function statusLabel(): string
     {
-        return $this->status === 'cancelled' ? 'Cancelled' : (self::STEPS[$this->status][0] ?? ucfirst($this->status));
+        return match ($this->status) {
+            'pending_payment' => 'Awaiting payment',
+            'cancelled' => 'Cancelled',
+            default => self::STEPS[$this->status][0] ?? ucfirst($this->status),
+        };
     }
 
     /**
@@ -74,6 +80,7 @@ class Order extends Model
         return match ($this->status) {
             'delivered' => 'bg-emerald-50 text-emerald-700 ring-emerald-200',
             'cancelled' => 'bg-red-50 text-red-700 ring-red-200',
+            'pending_payment' => 'bg-amber-50 text-amber-700 ring-amber-200',
             'shipped', 'out_for_delivery' => 'bg-blue-50 text-blue-700 ring-blue-200',
             default => 'bg-amber-50 text-amber-700 ring-amber-200',
         };

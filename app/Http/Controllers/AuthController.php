@@ -38,7 +38,7 @@ class AuthController extends Controller
         return response()->json([
             'message' => 'Registration successful.',
             'user' => $user->only(['id', 'name', 'phone', 'email']),
-            'redirect' => route('home'),
+            'redirect' => redirect()->intended(route('home'))->getTargetUrl(),
         ], 201);
     }
 
@@ -64,7 +64,7 @@ class AuthController extends Controller
         return response()->json([
             'message' => 'Login successful.',
             'user' => Auth::user()->only(['id', 'name', 'phone', 'email']),
-            'redirect' => route('home'),
+            'redirect' => redirect()->intended(route('home'))->getTargetUrl(),
         ]);
     }
 

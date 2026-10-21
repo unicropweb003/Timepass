@@ -15,7 +15,7 @@
 <div class="mt-3 flex flex-wrap items-start justify-between gap-3">
     <div>
         <h1 class="text-2xl font-bold text-gray-900">Order #{{ $order->order_number }}</h1>
-        <p class="mt-1 text-sm text-gray-500">Placed on {{ $order->created_at->format('d M Y, h:i A') }}</p>
+        <p class="mt-1 text-sm text-gray-500">{{ $order->status === 'pending_payment' ? 'Started on' : 'Placed on' }} {{ $order->created_at->format('d M Y, h:i A') }}</p>
     </div>
     <span class="rounded-full px-3 py-1 text-sm font-semibold ring-1 {{ $order->statusClasses() }}">{{ $order->statusLabel() }}</span>
 </div>
@@ -35,13 +35,18 @@
         <p class="mt-4 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700 ring-1 ring-red-100">
             This order was cancelled{{ $order->cancelled_at ? ' on ' . $order->cancelled_at->format('d M Y') : '' }}. Any payment made will be refunded to the original payment method.
         </p>
+    @elseif ($order->status === 'pending_payment')
+        <div class="mt-4 rounded-xl bg-amber-50 px-4 py-4 text-sm text-amber-900 ring-1 ring-amber-100">
+            <p>Payment has not been confirmed yet. This order will move to delivery tracking once Razorpay confirms a captured payment.</p>
+            <a href="{{ route('checkout.payment', $order->order_number) }}" class="mt-3 inline-flex font-semibold text-indigo-700 underline underline-offset-2">Continue payment</a>
+        </div>
     @else
         <ol class="mt-6 grid gap-6 sm:grid-cols-5 sm:gap-2">
             @foreach ($steps as $key => [$label, $column])
                 @php
                     $index = $loop->index;
                     $done = $currentIndex !== false && $index <= $currentIndex;
-                    $time = $order->{$column};
+                    $time = $key === 'placed' && $order->paid_at ? $order->paid_at : $order->{$column};
                 @endphp
                 <li class="relative flex gap-3 sm:flex-col sm:items-center sm:text-center">
                     @unless ($loop->last)
@@ -115,7 +120,10 @@
                 @endif
                 <div class="flex justify-between"><dt class="text-gray-500">Shipping</dt><dd class="text-gray-900">{{ $order->shipping > 0 ? $money($order->shipping) : 'Free' }}</dd></div>
                 <div class="flex justify-between border-t border-gray-100 pt-2 font-semibold"><dt class="text-gray-900">Total</dt><dd class="text-gray-900">{{ $money($order->total) }}</dd></div>
-                <div class="flex justify-between"><dt class="text-gray-500">Paid via</dt><dd class="text-gray-900">{{ $order->payment_method }}</dd></div>
+                <div class="flex justify-between"><dt class="text-gray-500">Payment method</dt><dd class="text-gray-900">{{ $order->payment_method }}</dd></div>
+                @if ($order->payment_status)
+                    <div class="flex justify-between"><dt class="text-gray-500">Payment status</dt><dd class="font-medium text-gray-900">{{ ucfirst($order->payment_status) }}</dd></div>
+                @endif
             </dl>
             @if ($order->transactions->isNotEmpty())
                 <a href="{{ route('account.transactions') }}" class="mt-4 inline-flex text-sm font-semibold text-indigo-600 hover:text-indigo-700">View transactions &rarr;</a>
