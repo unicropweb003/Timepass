@@ -6,12 +6,19 @@ COPY . .
 RUN npm run build
 
 FROM php:8.3-cli
+# phpredis is built from its GitHub release instead of `pecl install`, so a
+# pecl.php.net outage can't block deploys (one did on 2026-10-21).
+ARG PHPREDIS_VERSION=6.3.0
 RUN apt-get update && apt-get install -y git unzip libpq-dev libzip-dev \
         libjpeg62-turbo-dev libpng-dev libwebp-dev \
+    && docker-php-source extract \
+    && mkdir /usr/src/php/ext/redis \
+    && curl -fsSL --retry 3 "https://github.com/phpredis/phpredis/archive/refs/tags/${PHPREDIS_VERSION}.tar.gz" \
+        | tar -xz -C /usr/src/php/ext/redis --strip-components=1 \
     && docker-php-ext-configure gd --with-jpeg --with-webp \
-    && docker-php-ext-install pdo_pgsql zip gd opcache \
-    && pecl install redis && docker-php-ext-enable redis \
-    && rm -rf /var/lib/apt/lists/* /tmp/pear
+    && docker-php-ext-install pdo_pgsql zip gd opcache redis \
+    && docker-php-source delete \
+    && rm -rf /var/lib/apt/lists/*
 
 # Production PHP settings. OPcache keeps compiled code in memory so Laravel is
 # not re-compiled on every request (the code never changes inside the image,
