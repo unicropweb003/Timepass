@@ -20,6 +20,8 @@ class CheckoutController extends Controller
 
     private const FREE_SHIPPING_FROM_PAISE = 49900;
 
+    private const TEST_PAYMENT_METHOD = 'Test payment';
+
     public function show(Request $request, string $product, RazorpayGateway $gateway)
     {
         $product = $this->purchasableProduct($product);
@@ -28,6 +30,7 @@ class CheckoutController extends Controller
             'product' => $product,
             'addresses' => $request->user()->addresses()->orderByDesc('is_default')->latest()->get(),
             'gatewayReady' => $gateway->configured(),
+            'testPayment' => $this->testPaymentAllowed($request, $gateway),
             'shippingFee' => self::SHIPPING_FEE_PAISE / 100,
             'freeShippingThreshold' => self::FREE_SHIPPING_FROM_PAISE / 100,
         ]);
@@ -67,7 +70,8 @@ class CheckoutController extends Controller
             ])->filter()->implode(', ');
         }
 
-        if (! $gateway->configured()) {
+        $testPayment = $this->testPaymentAllowed($request, $gateway);
+        if (! $gateway->configured() && ! $testPayment) {
             return back()->withInput()->withErrors(['payment' => 'Online payment is being set up. Please try again later.']);
         }
 
@@ -81,19 +85,22 @@ class CheckoutController extends Controller
         }
 
         $orderNumber = 'TP-'.now()->format('ymd').'-'.Str::upper(Str::random(10));
-        try {
-            $gatewayOrder = $gateway->createOrder($totalPaise, $orderNumber);
-        } catch (Throwable $e) {
-            report($e);
+        $gatewayOrder = null;
+        if (! $testPayment) {
+            try {
+                $gatewayOrder = $gateway->createOrder($totalPaise, $orderNumber);
+            } catch (Throwable $e) {
+                report($e);
 
-            return back()->withInput()->withErrors(['payment' => 'The payment gateway is unavailable right now. Please try again shortly.']);
+                return back()->withInput()->withErrors(['payment' => 'The payment gateway is unavailable right now. Please try again shortly.']);
+            }
         }
 
         // Recheck price and stock after the external API call. If either changed,
         // this gateway order is never exposed to the customer and cannot be paid.
         $order = DB::transaction(function () use (
             $request, $product, $quantity, $subtotalPaise, $shippingPaise, $totalPaise,
-            $shippingName, $shippingPhone, $shippingAddress, $gatewayOrder, $orderNumber
+            $shippingName, $shippingPhone, $shippingAddress, $gatewayOrder, $orderNumber, $testPayment
         ) {
             $current = Product::query()->whereKey($product->id)->lockForUpdate()->firstOrFail();
             if (! $current->is_active
@@ -109,9 +116,9 @@ class CheckoutController extends Controller
                 'shipping' => $shippingPaise / 100,
                 'discount' => 0,
                 'total' => $totalPaise / 100,
-                'payment_method' => 'Razorpay',
+                'payment_method' => $testPayment ? self::TEST_PAYMENT_METHOD : 'Razorpay',
                 'payment_status' => 'pending',
-                'gateway_order_id' => $gatewayOrder['id'],
+                'gateway_order_id' => $gatewayOrder['id'] ?? null,
                 'shipping_name' => $shippingName,
                 'shipping_phone' => $shippingPhone,
                 'shipping_address' => $shippingAddress,
@@ -137,7 +144,15 @@ class CheckoutController extends Controller
         if ($order->payment_status === 'paid') {
             return redirect()->route('account.orders.show', $order->order_number);
         }
-        abort_unless($order->status === 'pending_payment' && $order->gateway_order_id, 404);
+        abort_unless($order->status === 'pending_payment', 404);
+
+        if ($order->payment_method === self::TEST_PAYMENT_METHOD) {
+            abort_unless($this->testPaymentAllowed($request, $gateway), 404);
+
+            return view('checkout.payment', ['order' => $order, 'testPayment' => true]);
+        }
+
+        abort_unless($order->gateway_order_id, 404);
         abort_unless($gateway->configured(), 503);
 
         $keyId = $gateway->keyId();
@@ -155,7 +170,42 @@ class CheckoutController extends Controller
             'theme' => ['color' => '#7c3aed'],
         ];
 
-        return view('checkout.payment', compact('order', 'keyId', 'checkoutPayload'));
+        return view('checkout.payment', compact('order', 'keyId', 'checkoutPayload') + ['testPayment' => false]);
+    }
+
+    /**
+     * Marks an admin's test order as paid without Razorpay. No money is taken;
+     * the order and its transaction are labelled as a test.
+     */
+    public function testPay(Request $request, string $orderNumber, RazorpayGateway $gateway)
+    {
+        abort_unless($this->testPaymentAllowed($request, $gateway), 403);
+        $order = $request->user()->orders()->where('order_number', $orderNumber)->firstOrFail();
+
+        DB::transaction(function () use ($order) {
+            $locked = Order::query()->whereKey($order->id)->lockForUpdate()->firstOrFail();
+            if ($locked->payment_status === 'paid') {
+                return;
+            }
+            abort_unless($locked->status === 'pending_payment' && $locked->payment_method === self::TEST_PAYMENT_METHOD, 404);
+
+            $locked->transactions()->create([
+                'user_id' => $locked->user_id,
+                'reference' => 'test_'.Str::lower(Str::random(20)),
+                'type' => 'payment',
+                'method' => 'Test',
+                'amount' => $locked->total,
+                'status' => 'success',
+            ]);
+            $locked->update([
+                'payment_status' => 'paid',
+                'paid_at' => now(),
+                'status' => 'placed',
+            ]);
+        });
+
+        return redirect()->route('account.orders.show', $order->order_number)
+            ->with('status', 'Test payment completed. No money was taken.');
     }
 
     public function confirm(Request $request, string $orderNumber, RazorpayGateway $gateway): JsonResponse
@@ -229,6 +279,14 @@ class CheckoutController extends Controller
         }
 
         return response()->json(['status' => 'ok']);
+    }
+
+    /** Until the Razorpay keys are set, admins (and only admins) can check out with a test payment. */
+    private function testPaymentAllowed(Request $request, RazorpayGateway $gateway): bool
+    {
+        $user = $request->user();
+
+        return ! $gateway->configured() && $user->is_admin && ! $user->is_blocked;
     }
 
     private function purchasableProduct(string $slug): Product

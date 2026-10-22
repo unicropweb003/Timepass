@@ -125,7 +125,10 @@
                 <div class="flex justify-between border-t border-gray-100 pt-3 text-base font-bold text-gray-950"><span>Total</span><span id="order-total"></span></div>
             </div>
             <p class="mt-5 rounded-xl bg-indigo-50 px-4 py-3 text-xs leading-relaxed text-indigo-800">Delivery is free from ₹{{ number_format($freeShippingThreshold) }}. Below that, shipping is ₹{{ number_format($shippingFee) }}. Your final amount is confirmed on the next step.</p>
-            @if ($gatewayReady)
+            @if ($testPayment)
+                <p role="status" class="mt-5 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">Razorpay is not connected yet. As an admin you can place this order with a test payment (no money is taken).</p>
+            @endif
+            @if ($gatewayReady || $testPayment)
                 <button type="submit" class="mt-5 flex w-full items-center justify-center rounded-xl bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-500 px-5 py-3.5 text-sm font-bold text-white shadow-lg shadow-purple-500/20 transition hover:shadow-xl focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">Continue to payment <span aria-hidden="true" class="ml-2">→</span></button>
             @else
                 <p role="status" class="mt-5 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">Online payment setup is pending. Checkout will be available once it is connected.</p>

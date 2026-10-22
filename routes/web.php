@@ -70,6 +70,8 @@ Route::post('/payments/razorpay/webhook', [CheckoutController::class, 'webhook']
 Route::middleware('auth')->prefix('checkout')->name('checkout.')->controller(CheckoutController::class)->group(function () {
     Route::get('/order/{orderNumber}', 'payment')->name('payment');
     Route::post('/order/{orderNumber}/confirm', 'confirm')->name('confirm');
+    // Admin-only test payment while the Razorpay keys are not set.
+    Route::post('/order/{orderNumber}/test-pay', 'testPay')->name('test-pay');
     Route::get('/{product}', 'show')->name('show');
     Route::post('/{product}', 'start')->name('start');
 });
