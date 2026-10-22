@@ -52,7 +52,9 @@ class AuthController extends Controller
             'password' => ['required', 'string'],
         ]);
 
-        if (! Auth::attempt($credentials, $request->boolean('remember'))) {
+        // No "remember me": a long-lived remember cookie would outlive the idle
+        // timeout (config/session.php "lifetime") and keep the user signed in.
+        if (! Auth::attempt($credentials)) {
             return response()->json([
                 'message' => 'Invalid credentials.',
                 'errors' => ['email' => ['These credentials do not match our records.']],

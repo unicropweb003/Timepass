@@ -36,10 +36,6 @@
                         class="mt-1 block w-full rounded-lg border border-gray-300 px-3.5 py-2.5 shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
                         placeholder="••••••••">
                 </div>
-                <label class="flex items-center gap-2 text-sm text-gray-600">
-                    <input type="checkbox" name="remember" class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
-                    Remember me
-                </label>
                 <button type="submit" class="w-full rounded-lg bg-indigo-600 px-4 py-2.5 font-semibold text-white shadow-sm transition hover:bg-indigo-500">
                     Sign in
                 </button>

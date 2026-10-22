@@ -35,7 +35,9 @@ return [
     |
     */
 
-    'lifetime' => (int) env('SESSION_LIFETIME', 120),
+    // Idle timeout: a visitor who makes no request for this many minutes is
+    // signed out. Logins never set a "remember me" cookie, which would bypass it.
+    'lifetime' => (int) env('SESSION_LIFETIME', 30),
 
     'expire_on_close' => env('SESSION_EXPIRE_ON_CLOSE', false),
 

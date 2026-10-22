@@ -43,7 +43,8 @@ class AuthController extends Controller
             throw ValidationException::withMessages(['email' => 'This account has been disabled.']);
         }
 
-        if (! Auth::attempt(['email' => $credentials['email'], 'password' => $credentials['password']], $request->boolean('remember'))) {
+        // No "remember me", so the session ends after the idle timeout.
+        if (! Auth::attempt(['email' => $credentials['email'], 'password' => $credentials['password']])) {
             throw ValidationException::withMessages(['email' => 'The password is incorrect.']);
         }
 
@@ -94,7 +95,7 @@ class AuthController extends Controller
             'avatar' => $googleUser->getAvatar(),
         ])->save();
 
-        Auth::login($user, true);
+        Auth::login($user);
         $request->session()->regenerate();
 
         return redirect()->intended(route('admin.dashboard'));

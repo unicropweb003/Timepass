@@ -30,11 +30,6 @@
                 <x-auth.input name="password" type="password" label="Password" autocomplete="current-password" placeholder="Enter your password" toggle
                     icon="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z" />
 
-                <label class="flex w-fit cursor-pointer items-center gap-2.5 text-sm text-gray-600">
-                    <input type="checkbox" id="remember" name="remember" class="h-4 w-4 rounded accent-indigo-600">
-                    Remember me
-                </label>
-
                 <p id="formError" class="hidden rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700 ring-1 ring-red-100"></p>
 
                 <button type="submit" id="submitBtn"
