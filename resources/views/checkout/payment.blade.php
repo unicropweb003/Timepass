@@ -12,7 +12,7 @@
         <p class="text-xs font-bold uppercase tracking-[0.22em] text-indigo-600">Order {{ $order->order_number }}</p>
         <h1 class="font-display mt-2 text-4xl font-semibold tracking-tight text-gray-950 sm:text-5xl">Ready to pay?</h1>
         @if ($testPayment)
-            <p class="mt-3 max-w-2xl text-gray-600">Razorpay is not connected yet, so as an admin you can complete this order with a test payment. No money is taken.</p>
+            <p class="mt-3 max-w-2xl text-gray-600">Test mode is on, so you can complete this order with a test payment. No money is taken.</p>
         @else
             <p class="mt-3 max-w-2xl text-gray-600">Check your delivery and total, then open the secure Razorpay payment window. Your order is confirmed after the payment is verified.</p>
         @endif
@@ -77,7 +77,7 @@
                     @csrf
                     <button type="submit" class="mt-6 flex w-full items-center justify-center rounded-xl bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-500 px-5 py-3.5 text-sm font-bold text-white shadow-lg shadow-purple-500/20 transition hover:shadow-xl focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">Complete test payment</button>
                 </form>
-                <p role="status" class="mt-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm leading-relaxed text-amber-800">Test mode (admins only): the order is marked as paid with "Test payment". No money is taken. Customers can pay once the Razorpay keys are added.</p>
+                <p role="status" class="mt-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm leading-relaxed text-amber-800">Test mode: the order is marked as paid with "Test payment". No money is taken.</p>
             @else
                 <button type="button" id="pay-button" disabled class="mt-6 flex w-full cursor-not-allowed items-center justify-center rounded-xl bg-gray-200 px-5 py-3.5 text-sm font-bold text-gray-500 transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">Loading secure payment…</button>
                 <button type="button" id="retry-verification" hidden class="mt-3 w-full rounded-xl border border-indigo-300 px-5 py-3 text-sm font-semibold text-indigo-700 transition hover:bg-indigo-50">Retry payment verification</button>

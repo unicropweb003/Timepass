@@ -13,7 +13,19 @@ class SettingController extends Controller
         return view('admin.settings.edit', [
             'contact' => config('shop.contact', []),
             'social' => config('shop.social', []),
+            'testPayments' => Setting::paymentTestMode(),
         ]);
+    }
+
+    /** Turn test payment mode on or off (checkout without paying, for testing). */
+    public function updateTestPayments(Request $request)
+    {
+        $enabled = $request->boolean('enabled');
+        Setting::put('payment_test_mode', $enabled);
+
+        return back()->with('status', $enabled
+            ? 'Test payments are ON. Customers can place orders without paying.'
+            : 'Test payments are OFF.');
     }
 
     public function update(Request $request)

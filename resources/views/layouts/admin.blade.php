@@ -89,6 +89,12 @@
         </header>
 
         <main class="flex-1 p-4 sm:p-6">
+            @if (\App\Models\Setting::paymentTestMode())
+                <div role="alert" class="mb-6 flex flex-wrap items-center gap-x-3 gap-y-1 rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm font-medium text-amber-800">
+                    Test payments are ON: customers can place orders without paying.
+                    <a href="{{ route('admin.settings.edit') }}" class="font-semibold underline">Turn off in Settings</a>
+                </div>
+            @endif
             @if (session('status'))
                 <div class="mb-6 flex items-center gap-3 rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm font-medium text-green-700">
                     <svg class="h-5 w-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg>

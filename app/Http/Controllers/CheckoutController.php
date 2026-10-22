@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Order;
 use App\Models\Product;
+use App\Models\Setting;
 use App\Models\Transaction;
 use App\Services\RazorpayGateway;
 use Illuminate\Http\JsonResponse;
@@ -174,7 +175,7 @@ class CheckoutController extends Controller
     }
 
     /**
-     * Marks an admin's test order as paid without Razorpay. No money is taken;
+     * Marks a test order as paid without Razorpay. No money is taken;
      * the order and its transaction are labelled as a test.
      */
     public function testPay(Request $request, string $orderNumber, RazorpayGateway $gateway)
@@ -281,12 +282,16 @@ class CheckoutController extends Controller
         return response()->json(['status' => 'ok']);
     }
 
-    /** Until the Razorpay keys are set, admins (and only admins) can check out with a test payment. */
+    /**
+     * Test payment (no money taken): for everyone while an admin has switched on
+     * test payments in Settings, otherwise for admins until the Razorpay keys are set.
+     */
     private function testPaymentAllowed(Request $request, RazorpayGateway $gateway): bool
     {
         $user = $request->user();
 
-        return ! $gateway->configured() && $user->is_admin && ! $user->is_blocked;
+        return ! $user->is_blocked
+            && (Setting::paymentTestMode() || (! $gateway->configured() && $user->is_admin));
     }
 
     private function purchasableProduct(string $slug): Product

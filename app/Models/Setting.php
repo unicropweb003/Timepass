@@ -41,6 +41,12 @@ class Setting extends Model
         static::updateOrCreate(['key' => $key], ['value' => json_encode($value)]);
     }
 
+    /** Admin switch (Settings): customers can finish checkout with a test payment, no money taken. */
+    public static function paymentTestMode(): bool
+    {
+        return (bool) static::get('payment_test_mode', false);
+    }
+
     /** Safe to call during boot: returns [] if the table isn't migrated yet. */
     public static function allSafely(): array
     {
