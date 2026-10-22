@@ -47,7 +47,7 @@
     <div class="flex flex-wrap items-end justify-between gap-3">
         <div>
             <p class="text-sm font-bold uppercase tracking-wider text-indigo-600">See it in action</p>
-            <h2 id="reels-title" class="font-display mt-1 text-2xl font-medium tracking-tight text-gray-900 sm:text-3xl">Watch &amp; shop.</h2>
+            <h2 id="reels-title" class="font-display mt-1 text-2xl font-bold tracking-tight text-gray-900 sm:text-3xl">Watch &amp; shop.</h2>
         </div>
         <div class="hidden gap-2 sm:flex">
             @foreach (['prev' => ['Scroll back', 'M15.75 19.5 8.25 12l7.5-7.5'], 'next' => ['Scroll forward', 'm8.25 4.5 7.5 7.5-7.5 7.5']] as $dir => [$label, $path])

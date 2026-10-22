@@ -92,7 +92,7 @@
             </button>
         </div>
 
-        <h1 class="font-display mt-3 text-3xl font-medium tracking-tight text-gray-900 sm:text-4xl">{{ $product['name'] }}</h1>
+        <h1 class="font-display mt-3 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">{{ $product['name'] }}</h1>
 
         @if (isset($product['id']) && ! empty($product['reviews']))
             <div class="mt-3 flex items-center gap-2">
@@ -232,7 +232,7 @@
                 <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09Z"/></svg>
             </span>
             <span class="min-w-0 flex-1">
-                <span class="font-display block text-lg font-medium text-gray-900 sm:text-xl">Product details</span>
+                <span class="font-display block text-lg font-bold text-gray-900 sm:text-xl">Product details</span>
                 <span class="block text-xs text-gray-500">Benefits, ingredients, directions and specifications</span>
             </span>
             <svg class="h-6 w-6 shrink-0 text-gray-400 transition-transform duration-300 group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m19 9-7 7-7-7"/></svg>
@@ -245,7 +245,7 @@
                         $isWide = $detailSection['title'] === 'Overview' || $hasSteps;
                     @endphp
                     <section class="min-w-0 rounded-2xl border border-gray-200/80 bg-white p-5 shadow-sm sm:p-6 {{ $isWide ? 'md:col-span-2' : '' }}">
-                        <h3 class="font-display text-lg font-medium leading-snug text-gray-900 sm:text-xl">{{ $detailSection['title'] }}</h3>
+                        <h3 class="font-display text-lg font-bold leading-snug text-gray-900 sm:text-xl">{{ $detailSection['title'] }}</h3>
                         <div class="mt-3 h-0.5 w-10 rounded-full" style="background-color: {{ $c1 }}"></div>
                         <div class="mt-4 space-y-4 text-[15px] leading-7 text-gray-700">
                             @foreach ($detailSection['blocks'] as $detailBlock)
@@ -271,7 +271,7 @@
             </div>
 
             {{-- Specifications: modern strip with soft icons + subtle dividers --}}
-            <h3 class="mt-8 font-display text-lg font-medium text-gray-900 sm:text-xl">Specifications</h3>
+            <h3 class="mt-8 font-display text-lg font-bold text-gray-900 sm:text-xl">Specifications</h3>
             <div class="mt-3 grid grid-cols-2 divide-x divide-y divide-gray-100 overflow-hidden rounded-2xl border border-gray-100 bg-white sm:grid-cols-4 sm:divide-y-0">
                 @foreach ($specs as [$label, $value, $icon])
                     <div class="flex flex-col items-center gap-2.5 p-5 text-center transition hover:bg-gray-50/70">
@@ -290,7 +290,7 @@
 {{-- Related --}}
 @if ($related->isNotEmpty())
     <section class="pd-reveal mt-16">
-        <h2 class="font-display text-2xl font-medium tracking-tight text-gray-900 sm:text-3xl">You may also like</h2>
+        <h2 class="font-display text-2xl font-bold tracking-tight text-gray-900 sm:text-3xl">You may also like</h2>
         <div class="mt-6 grid grid-cols-2 gap-4 sm:gap-5 lg:grid-cols-4">
             @foreach ($related as $rel)
                 @include('partials.product-card-premium', ['product' => $rel, 'accent' => $accent($rel['category_slug'] ?? '')])

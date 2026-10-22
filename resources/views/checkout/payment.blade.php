@@ -10,7 +10,7 @@
 
     <div class="mb-8">
         <p class="text-xs font-bold uppercase tracking-[0.22em] text-indigo-600">Order {{ $order->order_number }}</p>
-        <h1 class="font-display mt-2 text-4xl font-medium tracking-tight text-gray-950 sm:text-5xl">Ready to pay?</h1>
+        <h1 class="font-display mt-2 text-4xl font-semibold tracking-tight text-gray-950 sm:text-5xl">Ready to pay?</h1>
         <p class="mt-3 max-w-2xl text-gray-600">Check your delivery and total, then open the secure Razorpay payment window. Your order is confirmed after the payment is verified.</p>
     </div>
 
@@ -31,7 +31,7 @@
                 <div class="flex items-center gap-4">
                     <span class="flex h-9 w-9 items-center justify-center rounded-full bg-indigo-600 text-sm font-bold text-white">2</span>
                     <div>
-                        <h2 id="items-heading" class="font-display text-2xl font-medium text-gray-950">Your order</h2>
+                        <h2 id="items-heading" class="font-display text-2xl font-semibold text-gray-950">Your order</h2>
                         <p class="mt-1 text-sm text-gray-500">Review the items and amount due.</p>
                     </div>
                 </div>
@@ -50,7 +50,7 @@
             </section>
 
             <section class="rounded-3xl border border-gray-200 bg-white p-5 shadow-sm sm:p-7" aria-labelledby="address-heading">
-                <h2 id="address-heading" class="font-display text-2xl font-medium text-gray-950">Delivery details</h2>
+                <h2 id="address-heading" class="font-display text-2xl font-semibold text-gray-950">Delivery details</h2>
                 <p class="mt-4 font-semibold text-gray-900">{{ $order->shipping_name }}</p>
                 <p class="mt-1 text-sm leading-relaxed text-gray-600">{{ $order->shipping_address }}</p>
                 <p class="mt-1 text-sm text-gray-500">Phone: {{ $order->shipping_phone }}</p>
@@ -58,7 +58,7 @@
         </div>
 
         <aside class="rounded-3xl border border-gray-200 bg-white p-5 shadow-sm lg:sticky lg:top-28 sm:p-6" aria-labelledby="payment-heading">
-            <h2 id="payment-heading" class="font-display text-2xl font-medium text-gray-950">Payment summary</h2>
+            <h2 id="payment-heading" class="font-display text-2xl font-semibold text-gray-950">Payment summary</h2>
             <dl class="mt-5 space-y-3 text-sm">
                 <div class="flex justify-between text-gray-600"><dt>Items subtotal</dt><dd>₹{{ number_format($order->subtotal, 2) }}</dd></div>
                 <div class="flex justify-between text-gray-600"><dt>Shipping</dt><dd>{{ (float) $order->shipping === 0.0 ? 'Free' : '₹'.number_format($order->shipping, 2) }}</dd></div>
