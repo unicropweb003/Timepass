@@ -195,7 +195,7 @@
             <span class="inline-flex items-center gap-3 text-[11px] font-semibold uppercase tracking-[0.3em] text-indigo-600">
                 <span class="h-px w-7 bg-indigo-400"></span> TimePass Beauty
             </span>
-            <h1 class="font-display mt-6 text-[2.5rem] font-bold leading-[1.08] tracking-tight text-gray-900 sm:text-5xl lg:text-[3.5rem]">
+            <h1 class="font-display mt-6 text-[2.5rem] font-medium leading-[1.08] tracking-tight text-gray-900 sm:text-5xl lg:text-[3.5rem]">
                 Beauty &amp; personal care<br>made for <em class="not-italic text-indigo-600">you</em>.
             </h1>
             <p class="mt-5 max-w-md text-base leading-relaxed text-gray-600">
@@ -227,7 +227,7 @@
                      class="h-full w-full object-cover">
             </div>
             <span class="tp-float absolute -left-2 top-8 flex h-[4.5rem] w-[4.5rem] flex-col items-center justify-center rounded-full bg-white text-center shadow-xl ring-1 ring-black/5 sm:-left-4">
-                <span class="font-display text-xl font-bold leading-none text-indigo-600">{{ $offer['discount'] }}</span>
+                <span class="font-display text-xl font-medium leading-none text-indigo-600">{{ $offer['discount'] }}</span>
                 <span class="mt-0.5 text-[9px] font-bold uppercase tracking-widest text-gray-500">off</span>
             </span>
         </div>
@@ -259,7 +259,7 @@
     <div class="flex flex-wrap items-end justify-between gap-3">
         <div>
             <p class="text-sm font-bold uppercase tracking-wider text-indigo-600">A look for every mood</p>
-            <h2 class="font-display mt-1 text-2xl font-bold tracking-tight text-gray-900 sm:text-3xl">What's your vibe today?</h2>
+            <h2 class="font-display mt-1 text-2xl font-medium tracking-tight text-gray-900 sm:text-3xl">What's your vibe today?</h2>
         </div>
         <a href="{{ route('products') }}" class="group inline-flex items-center gap-1.5 border-b-2 border-gray-900 pb-0.5 text-sm font-bold text-gray-900">
             Shop all
@@ -282,7 +282,7 @@
                     <svg class="relative h-12 w-12 transition-transform duration-300 group-hover:scale-105 sm:h-[3.25rem] sm:w-[3.25rem]"
                          style="color: {{ $c2 }}" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="{{ $cat['icon'] }}"/></svg>
                 </span>
-                <span class="font-display mt-4 text-sm font-semibold leading-tight text-gray-900 sm:text-[0.95rem]">{{ $cat['name'] }}</span>
+                <span class="font-display mt-4 text-sm font-medium leading-tight text-gray-900 sm:text-[0.95rem]">{{ $cat['name'] }}</span>
                 <span class="mt-1 text-xs font-medium text-gray-400">{{ $n }} {{ $n === 1 ? 'item' : 'items' }}</span>
             </a>
         @endforeach
@@ -327,7 +327,7 @@
         </div>
         <div class="flex flex-col justify-center p-6 sm:p-8 lg:col-span-3 lg:p-10">
             <p class="text-xs font-semibold uppercase tracking-wider text-indigo-600">About this offer</p>
-            <h2 class="font-display mt-2 text-2xl font-bold text-gray-900 sm:text-3xl">{{ $offer['title'] }}: {{ $offer['discount'] }} off everything</h2>
+            <h2 class="font-display mt-2 text-2xl font-medium text-gray-900 sm:text-3xl">{{ $offer['title'] }}: {{ $offer['discount'] }} off everything</h2>
             <p class="mt-3 text-gray-600">{{ $offer['description'] }}</p>
             <ul class="mt-6 grid gap-x-6 gap-y-3 sm:grid-cols-2">
                 @foreach ($offer['benefits'] as $benefit)
@@ -357,7 +357,7 @@
     <div class="flex flex-wrap items-end justify-between gap-3">
         <div>
             <p class="text-sm font-bold uppercase tracking-wider text-indigo-600">The ones you come back for</p>
-            <h2 class="font-display mt-1 text-2xl font-bold tracking-tight text-gray-900 sm:text-3xl">Best sellers. For good reason.</h2>
+            <h2 class="font-display mt-1 text-2xl font-medium tracking-tight text-gray-900 sm:text-3xl">Best sellers. For good reason.</h2>
         </div>
         <a href="{{ $bestSellers['link'] ?? route('products') }}" class="group inline-flex items-center gap-1.5 border-b-2 border-gray-900 pb-0.5 text-sm font-bold text-gray-900">
             Meet the favourites
@@ -404,7 +404,7 @@
 <section data-reveal class="mt-20 grid items-center gap-10 lg:grid-cols-2 lg:gap-16">
     <div class="order-2 lg:order-1">
         <p class="text-sm font-bold uppercase tracking-wider text-indigo-600">Good skin. Better days.</p>
-        <h2 class="font-display mt-3 text-3xl font-bold leading-tight tracking-tight text-gray-900 sm:text-4xl">Everyday beauty.<br>Extraordinary you.</h2>
+        <h2 class="font-display mt-3 text-3xl font-medium leading-tight tracking-tight text-gray-900 sm:text-4xl">Everyday beauty.<br>Extraordinary you.</h2>
         <p class="mt-5 max-w-lg text-gray-600 leading-relaxed">
             From your morning routine to your night-time ritual, there's a TimePass pick for every little moment.
             Discover a world of care, colour and feel-good favourites — made simple, honest and affordable.
@@ -433,7 +433,7 @@
     <div class="flex flex-wrap items-end justify-between gap-3">
         <div>
             <p class="text-sm font-bold uppercase tracking-wider text-indigo-600">Just in</p>
-            <h2 class="font-display mt-1 text-2xl font-bold tracking-tight text-gray-900 sm:text-3xl">New arrivals.</h2>
+            <h2 class="font-display mt-1 text-2xl font-medium tracking-tight text-gray-900 sm:text-3xl">New arrivals.</h2>
         </div>
         <a href="{{ $recommended['link'] ?? route('products') }}" class="group inline-flex items-center gap-1.5 border-b-2 border-gray-900 pb-0.5 text-sm font-bold text-gray-900">
             See what's new
@@ -459,7 +459,7 @@
                     class="tp-promo-card group relative flex aspect-[2/3] flex-col rounded-[2rem] p-4 shadow-xl ring-1 ring-gray-900/5 sm:aspect-[8/11] sm:p-5 {{ $i === 1 ? 'tp-promo-card--toothpaste' : '' }} {{ $i === 2 ? 'tp-promo-card--hydration' : '' }} {{ $i === 3 ? 'tp-promo-card--hair' : '' }}">
                     <div class="tp-promo-copy relative z-10 pb-3">
                         <p class="tp-promo-eyebrow text-[10px] font-bold uppercase tracking-[0.15em] sm:text-[11px]">{{ $promo['eyebrow'] }}</p>
-                        <h3 class="mt-1 text-xl/tight font-black xl:text-2xl/tight">{{ $promo['title'] }}</h3>
+                        <h3 class="font-display mt-1 text-xl/tight font-medium xl:text-2xl/tight">{{ $promo['title'] }}</h3>
                         <p class="tp-promo-tagline mt-2 text-xs leading-snug sm:text-[11px] xl:text-xs">{{ $promo['tagline'] }}</p>
                     </div>
                     <div class="tp-promo-photo relative min-h-0 flex-1 overflow-hidden rounded-[1.5rem]">
@@ -502,7 +502,7 @@
 @if ($reviews)
 <section data-reveal class="mt-20" aria-labelledby="reviews-title">
     <div class="text-center">
-        <h2 id="reviews-title" class="font-display text-3xl font-bold text-gray-900 sm:text-4xl">What our customers say</h2>
+        <h2 id="reviews-title" class="font-display text-3xl font-medium text-gray-900 sm:text-4xl">What our customers say</h2>
         <p class="mt-2 text-gray-500">Honest words from people who shop with TimePass.</p>
     </div>
     <div class="mx-auto mt-8 grid max-w-4xl gap-6 md:grid-cols-2">
@@ -532,7 +532,7 @@
     <div class="tp-blob pointer-events-none absolute -right-16 -top-16 h-60 w-60 rounded-full bg-white/10 blur-2xl"></div>
     <div class="tp-blob pointer-events-none absolute -bottom-20 -left-12 h-64 w-64 rounded-full bg-pink-300/20 blur-2xl" style="animation-delay:-6s"></div>
     <div class="relative mx-auto max-w-2xl">
-        <h2 class="font-display text-4xl font-bold tracking-tight sm:text-5xl">Ready to glow?</h2>
+        <h2 class="font-display text-4xl font-medium tracking-tight sm:text-5xl">Ready to glow?</h2>
         <p class="mt-4 text-white/90">Treat yourself today — your new favourites are just a tap away.</p>
         <div class="mt-8 flex flex-wrap items-center justify-center gap-3">
             <a href="{{ route('products') }}" class="nav-shimmer inline-flex h-12 items-center gap-2 rounded-full bg-white px-7 text-sm font-bold text-indigo-700 shadow-lg transition hover:-translate-y-0.5 hover:shadow-xl">

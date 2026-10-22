@@ -6,7 +6,7 @@
     style="background-color: {{ $banner['panel'] }}">
     <div class="relative z-10 flex flex-col justify-center p-6 sm:w-1/2 {{ $wide ? 'sm:p-10 lg:pl-14' : 'sm:p-8' }} {{ $banner['dark'] ? 'text-white' : 'text-gray-900' }}">
         <p class="text-xs font-semibold uppercase tracking-[0.18em] {{ $banner['dark'] ? 'text-white/70' : 'text-gray-500' }}">{{ $banner['eyebrow'] }}</p>
-        <h3 class="mt-2 font-black leading-tight {{ $wide ? 'text-2xl sm:text-4xl lg:text-5xl' : 'text-2xl lg:text-3xl' }}">{{ $banner['title'] }}</h3>
+        <h3 class="font-display mt-2 font-medium leading-tight {{ $wide ? 'text-2xl sm:text-4xl lg:text-5xl' : 'text-2xl lg:text-3xl' }}">{{ $banner['title'] }}</h3>
         <p class="mt-3 max-w-sm text-sm {{ $wide ? 'sm:text-base' : '' }} {{ $banner['dark'] ? 'text-white/80' : 'text-gray-600' }}">{{ $banner['text'] }}</p>
         <span class="mt-6 inline-flex w-fit items-center gap-1.5 rounded-full px-5 py-2.5 text-sm font-semibold shadow-sm transition group-hover:gap-2.5 {{ $banner['dark'] ? 'bg-white text-gray-900' : 'bg-gray-900 text-white' }}">
             {{ $banner['cta'] }}

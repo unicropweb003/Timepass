@@ -19,7 +19,7 @@
 
     <div class="mb-8">
         <p class="text-xs font-bold uppercase tracking-[0.22em] text-indigo-600">TimePass checkout</p>
-        <h1 class="font-display mt-2 text-4xl font-semibold tracking-tight text-gray-950 sm:text-5xl">Almost yours.</h1>
+        <h1 class="font-display mt-2 text-4xl font-medium tracking-tight text-gray-950 sm:text-5xl">Almost yours.</h1>
         <p class="mt-3 max-w-2xl text-gray-600">Choose where we should send your order. You will review the final amount before opening the secure payment window.</p>
     </div>
 
@@ -41,7 +41,7 @@
                 <div class="flex items-start gap-4">
                     <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-indigo-600 text-sm font-bold text-white">1</span>
                     <div>
-                        <h2 id="delivery-heading" class="font-display text-2xl font-semibold text-gray-950">Delivery address</h2>
+                        <h2 id="delivery-heading" class="font-display text-2xl font-medium text-gray-950">Delivery address</h2>
                         <p class="mt-1 text-sm text-gray-500">Select a saved address or enter a new one for this order.</p>
                     </div>
                 </div>
@@ -103,7 +103,7 @@
         </div>
 
         <aside class="rounded-3xl border border-gray-200 bg-white p-5 shadow-sm lg:sticky lg:top-28 sm:p-6" aria-labelledby="summary-heading">
-            <h2 id="summary-heading" class="font-display text-2xl font-semibold text-gray-950">Order summary</h2>
+            <h2 id="summary-heading" class="font-display text-2xl font-medium text-gray-950">Order summary</h2>
             <div class="mt-5 flex items-center gap-4 border-b border-gray-100 pb-5">
                 <img src="{{ $product->image_url ?: asset('images/no-image.svg') }}" alt="{{ $product->name }}" class="h-20 w-20 shrink-0 rounded-xl border border-gray-100 bg-gray-50 object-contain p-2">
                 <div class="min-w-0">

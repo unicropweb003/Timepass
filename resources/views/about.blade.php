@@ -45,7 +45,7 @@
             <p class="whitespace-pre-line text-lg leading-[1.8] text-[#2d2a2b] sm:text-[1.35rem]">{{ $aboutContent }}</p>
 
             <section class="mt-14 sm:mt-16" aria-labelledby="about-offer">
-                <h2 id="about-offer" class="font-display text-3xl font-semibold tracking-tight text-[#3e2636] sm:text-4xl">What we offer</h2>
+                <h2 id="about-offer" class="font-display text-3xl font-medium tracking-tight text-[#3e2636] sm:text-4xl">What we offer</h2>
                 <ul class="mt-6 list-disc space-y-3 pl-6 text-base leading-relaxed text-[#343032] marker:text-[#b45486] sm:text-lg">
                     @foreach ($categories as $category)
                         <li class="pl-1">
@@ -59,7 +59,7 @@
             </section>
 
             <section class="mt-14 sm:mt-16" aria-labelledby="about-shopping">
-                <h2 id="about-shopping" class="font-display text-3xl font-semibold tracking-tight text-[#3e2636] sm:text-4xl">How we make shopping simple</h2>
+                <h2 id="about-shopping" class="font-display text-3xl font-medium tracking-tight text-[#3e2636] sm:text-4xl">How we make shopping simple</h2>
                 <p class="mt-5 text-base leading-[1.8] text-[#484044] sm:text-lg">
                     Browse by category, read the product details and choose the things that suit your routine. Keep favourites in your wishlist, or contact us when you need help with a product or an order.
                 </p>
